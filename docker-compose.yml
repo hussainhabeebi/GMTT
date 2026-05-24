@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  gmtt-dashboard:
+    build: .
+    container_name: gmtt-dashboard
+    restart: unless-stopped
+    ports:
+      - "3080:80"        # change left port if 3080 is taken on your VPS
+    labels:
+      # Coolify / Traefik labels — update domain as needed
+      - "traefik.enable=true"
+      - "traefik.http.routers.gmtt.rule=Host(`gmtt.aiingo.com`)"
+      - "traefik.http.routers.gmtt.entrypoints=websecure"
+      - "traefik.http.routers.gmtt.tls.certresolver=letsencrypt"
+      - "traefik.http.services.gmtt.loadbalancer.server.port=80"
