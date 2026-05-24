@@ -1,0 +1,6 @@
+*.zip
+*.md
+.DS_Store
+Dockerfile
+nginx.conf
+.dockerignore
