@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GMTT — Guiders Mission</title>
+<script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+<style>
+/* ── Chatwoot-inspired design system ── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f3f4f6;
+  --surface:#ffffff;
+  --surface2:#f9fafb;
+  --border:#e5e7eb;
+  --border2:#d1d5db;
+  --accent:#1f93ff;
+  --accent-bg:#eff6ff;
+  --accent-dark:#1570cd;
+  --green:#059669;
+  --green-bg:#ecfdf5;
+  --yellow:#d97706;
+  --yellow-bg:#fffbeb;
+  --red:#dc2626;
+  --red-bg:#fef2f2;
+  --purple:#7c3aed;
+  --purple-bg:#f5f3ff;
+  --text:#111827;
+  --text2:#374151;
+  --muted:#6b7280;
+  --muted2:#9ca3af;
+  --radius:8px;
+  --radius-lg:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,.08),0 2px 4px -1px rgba(0,0,0,.04);
+  --font:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
+  --sidebar:240px;
+}
+
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ── TOPBAR ── */
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:14px;position:sticky;top:0;z-index:200;box-shadow:var(--shadow)}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;color:var(--text);white-space:nowrap}
+.topbar-logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#1f93ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
+.topbar-badge{font-size:10px;font-weight:600;background:var(--accent-bg);color:var(--accent);padding:2px 7px;border-radius:20px;border:1px solid #bfdbfe}
+.topbar-divider{width:1px;height:24px;background:var(--border);margin:0 4px}
+.topbar-nav{display:flex;gap:2px;flex:1;overflow-x:auto}
+.topbar-nav::-webkit-scrollbar{display:none}
+.tnav{padding:6px 14px;border-radius:6px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;border:none;background:none;font-family:inherit;transition:.12s;display:flex;align-items:center;gap:6px}
+.tnav:hover{background:var(--bg);color:var(--text2)}
+.tnav.active{background:var(--accent-bg);color:var(--accent);font-weight:600}
+.tnav .tab-icon{font-size:14px}
+.topbar-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#1f93ff,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.status-pill{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:3px 10px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:.12s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.btn:hover{border-color:var(--border2);background:var(--bg);color:var(--text)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.btn.success{background:var(--green);border-color:var(--green);color:#fff}
+.btn.sm{padding:4px 10px;font-size:12px}
+.btn.icon{padding:6px;width:32px;height:32px;justify-content:center}
+
+/* ── TABS ── */
+.tab-content{display:none;flex:1;padding:20px;overflow-y:auto}
+.tab-content.active{display:block}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow);position:relative}
+.kpi-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px}
+.kpi-icon.green{background:var(--green-bg)}
+.kpi-icon.blue{background:var(--accent-bg)}
+.kpi-icon.yellow{background:var(--yellow-bg)}
+.kpi-icon.red{background:var(--red-bg)}
+.kpi-icon.purple{background:var(--purple-bg)}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kpi-val{font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.kpi-trend{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── CARDS ── */
+.row{display:grid;gap:16px;margin-bottom:20px}
+.row.two{grid-template-columns:1fr 1fr}
+.row.three{grid-template-columns:1fr 1fr 1fr}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;color:var(--text2)}
+.card-body{padding:16px 18px}
+.card-foot{padding:10px 18px;border-top:1px solid var(--border);background:var(--surface2);border-radius:0 0 var(--radius-lg) var(--radius-lg)}
+
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+th:first-child{border-radius:0}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+tr:hover td{background:#f9fafb}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:.1s}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge.green{background:var(--green-bg);color:var(--green)}
+.badge.yellow{background:var(--yellow-bg);color:var(--yellow)}
+.badge.red{background:var(--red-bg);color:var(--red)}
+.badge.blue{background:var(--accent-bg);color:var(--accent)}
+.badge.grey{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.badge.purple{background:var(--purple-bg);color:var(--purple)}
+
+/* ── FILTERS / FORM ── */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filters input,.filters select,
+.form-input,.form-select,.form-textarea{
+  background:var(--surface);border:1.5px solid var(--border);color:var(--text);
+  padding:7px 11px;border-radius:6px;font-size:13px;font-family:inherit;
+  outline:none;transition:.12s
+}
+.filters input:focus,.filters select:focus,
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,147,255,.12)}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── PROGRESS BARS ── */
+.prog-item{margin-bottom:10px}
+.prog-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+.prog-track{height:6px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.prog-fill{height:100%;border-radius:4px;background:var(--accent);transition:.6s}
+.prog-fill.green{background:var(--green)}
+.prog-fill.yellow{background:var(--yellow)}
+
+/* ── CONVERSATION LAYOUT ── */
+.conv-layout{display:grid;grid-template-columns:280px 1fr;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;height:calc(100vh - 180px);background:var(--surface);box-shadow:var(--shadow)}
+.conv-sidebar{border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface2)}
+.conv-sidebar-head{padding:12px;border-bottom:1px solid var(--border);background:var(--surface)}
+.conv-sidebar-head input{width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;font-size:13px;font-family:inherit;outline:none}
+.conv-sidebar-head input:focus{border-color:var(--accent)}
+.conv-list-scroll{overflow-y:auto;flex:1}
+.conv-item{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s}
+.conv-item:hover{background:#f0f5ff}
+.conv-item.selected{background:var(--accent-bg);border-left:3px solid var(--accent)}
+.conv-name{font-size:13px;font-weight:600;color:var(--text)}
+.conv-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;margin-top:2px}
+.conv-meta-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.conv-time{font-size:11px;color:var(--muted2)}
+.unread-badge{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* ── CHAT PANE ── */
+.chat-pane{display:flex;flex-direction:column;background:#fff}
+.chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--muted);gap:8px}
+.chat-empty-icon{font-size:40px;opacity:.3}
+.chat-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface)}
+.chat-header-info{display:flex;align-items:center;gap:10px}
+.chat-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.chat-contact-name{font-weight:600;font-size:14px;color:var(--text)}
+.chat-contact-meta{font-size:12px;color:var(--muted)}
+.chat-actions{display:flex;gap:6px}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#f8fafc}
+.msg{max-width:68%;display:flex;flex-direction:column}
+.msg.incoming{align-self:flex-start}
+.msg.outgoing{align-self:flex-end}
+.msg-bubble{padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.55}
+.msg.incoming .msg-bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text)}
+.msg.outgoing .msg-bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.msg-time{font-size:10px;color:var(--muted2);margin-top:3px;padding:0 3px}
+.msg.outgoing .msg-time{text-align:right;color:#93c5fd}
+.chat-footer{padding:10px 14px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:8px;align-items:flex-end}
+.chat-footer textarea{flex:1;background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;font-family:inherit;resize:none;outline:none;min-height:40px;max-height:100px;transition:.12s}
+.chat-footer textarea:focus{border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px rgba(31,147,255,.1)}
+
+/* ── LEAD PANEL ── */
+.lead-panel{width:220px;border-left:1px solid var(--border);overflow-y:auto;background:var(--surface2);padding:14px}
+.lead-panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px}
+.lf-item{margin-bottom:10px}
+.lf-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--muted2);margin-bottom:2px}
+.lf-value{font-size:13px;color:var(--text2);font-weight:500}
+
+/* ── STATUS TABS ── */
+.status-tabs{display:flex;gap:4px;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content}
+.stab{padding:5px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;border:none;background:none;color:var(--muted);font-family:inherit;transition:.12s}
+.stab:hover{background:var(--bg);color:var(--text2)}
+.stab.active{background:var(--surface);color:var(--text);font-weight:600;box-shadow:var(--shadow)}
+
+/* ── COUNT PILL ── */
+.count-pill{display:inline-flex;align-items:center;gap:4px;background:var(--accent-bg);color:var(--accent);border:1px solid #bfdbfe;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:600}
+
+/* ── SEND RESULT ── */
+.send-result{border-radius:8px;padding:12px 14px;margin-top:12px;font-size:13px;display:none;border:1px solid}
+.send-result.ok{background:var(--green-bg);border-color:#a7f3d0;color:var(--green)}
+.send-result.err{background:var(--red-bg);border-color:#fecaca;color:var(--red)}
+
+/* ── PAGINATION ── */
+.pagination{display:flex;gap:8px;align-items:center;justify-content:center;padding:14px 0;font-size:13px;color:var(--muted)}
+.pagination button{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;transition:.12s}
+.pagination button:hover:not(:disabled){background:var(--bg);border-color:var(--border2)}
+.pagination button:disabled{opacity:.4;cursor:default}
+
+/* ── MISC ── */
+.empty-state{text-align:center;color:var(--muted);padding:40px 20px;font-size:13px}
+.loading{text-align:center;color:var(--muted2);padding:20px;font-size:13px}
+.copy-btn{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:4px;transition:.1s}
+.copy-btn:hover{background:var(--bg);color:var(--accent)}
+.stage-sel{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:3px 8px;border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:500}
+.stage-sel:focus{outline:none;border-color:var(--accent)}
+
+/* ── SECTION HEADER ── */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:15px;font-weight:700;color:var(--text)}
+.sec-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── STRIPE TAB ── */
+.stripe-wrap{max-width:1100px;margin:0 auto;padding:10px 0 40px}
+.stripe-heading{text-align:center;margin-bottom:32px}
+.stripe-heading h2{font-size:26px;font-weight:800;color:var(--text);margin-bottom:8px}
+.stripe-heading p{color:var(--muted);font-size:15px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;font-weight:500;box-shadow:var(--shadow-md);opacity:0;pointer-events:none;transition:.2s;z-index:999;max-width:300px;display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1}
+.toast.ok{border-color:#a7f3d0;color:var(--green);background:var(--green-bg)}
+.toast.err{border-color:#fecaca;color:var(--red);background:var(--red-bg)}
+.toast.warn{border-color:#fde68a;color:var(--yellow);background:var(--yellow-bg)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+
+@media(max-width:768px){
+  .row.two,.row.three{grid-template-columns:1fr}
+  .conv-layout{grid-template-columns:1fr;height:auto}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-logo-icon">G</div>
+    GMTT
+  </div>
+  <span class="topbar-badge">Guiders Mission</span>
+  <div class="topbar-divider"></div>
+
+  <nav class="topbar-nav">
+    <button class="tnav active" onclick="showTab('overview')"><span class="tab-icon">📊</span> Overview</button>
+    <button class="tnav" onclick="showTab('leads')"><span class="tab-icon">👤</span> Leads</button>
+    <button class="tnav" onclick="showTab('conversations')"><span class="tab-icon">💬</span> Conversations</button>
+    <button class="tnav" onclick="showTab('campaigns')"><span class="tab-icon">📱</span> Campaigns</button>
+    <button class="tnav" onclick="showTab('email')"><span class="tab-icon">✉</span> Email</button>
+    <button class="tnav" onclick="showTab('analytics')"><span class="tab-icon">📈</span> Analytics</button>
+    <button class="tnav" onclick="showTab('pricing')"><span class="tab-icon">💳</span> Pricing</button>
+  </nav>
+
+  <div class="topbar-right">
+    <div class="status-pill"><div class="status-dot"></div><span id="live-clock"></span></div>
+    <button class="btn sm" onclick="loadAll()">⟳ Refresh</button>
+    <div class="avatar">H</div>
+  </div>
+</header>
+
+<!-- ══ OVERVIEW ══ -->
+<div id="tab-overview" class="tab-content active">
+  <div class="sec-header">
+    <div><div class="sec-title">Dashboard Overview</div><div class="sec-sub">Malta Nursing Recruitment — Healthmark</div></div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-icon blue">👤</div><div class="kpi-label">Total Leads</div><div class="kpi-val" id="kpi-total">—</div></div>
+    <div class="kpi"><div class="kpi-icon green">✅</div><div class="kpi-label">Eligible</div><div class="kpi-val" id="kpi-eligible">—</div></div>
+    <div class="kpi"><div class="kpi-icon purple">📨</div><div class="kpi-label">Invite Sent</div><div class="kpi-val" id="kpi-invited">—</div></div>
+    <div class="kpi"><div class="kpi-icon yellow">🌍</div><div class="kpi-label">Gulf</div><div class="kpi-val" id="kpi-gulf">—</div></div>
+    <div class="kpi"><div class="kpi-icon blue">💬</div><div class="kpi-label">Open Convos</div><div class="kpi-val" id="kpi-open">—</div></div>
+    <div class="kpi"><div class="kpi-icon yellow">⏳</div><div class="kpi-label">Pending</div><div class="kpi-val" id="kpi-pending">—</div></div>
+    <div class="kpi"><div class="kpi-icon green">✓</div><div class="kpi-label">Resolved</div><div class="kpi-val" id="kpi-resolved">—</div></div>
+    <div class="kpi"><div class="kpi-icon red">⚠</div><div class="kpi-label">Unverified</div><div class="kpi-val" id="kpi-unverified">—</div></div>
+  </div>
+
+  <div class="row two">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Stage Breakdown</span></div>
+      <div class="card-body" id="stage-chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Top States</span></div>
+      <div class="card-body" id="state-chart"></div>
+    </div>
+  </div>
+  <div class="row two">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Degree Distribution</span></div>
+      <div class="card-body" id="degree-chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Recent Leads</span></div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Name</th><th>State</th><th>Degree</th><th>Stage</th><th>Eligible</th></tr></thead>
+        <tbody id="recent-leads-body"><tr><td colspan="5" class="loading">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LEADS ══ -->
+<div id="tab-leads" class="tab-content">
+  <div class="sec-header">
+    <div class="sec-title">All Leads</div>
+    <button class="btn sm" onclick="exportLeadsCSV()">⬇ Export CSV</button>
+  </div>
+  <div class="filters">
+    <input id="leads-search" placeholder="🔍  Search name / phone / email…" style="min-width:220px" oninput="renderLeadsTable()">
+    <select id="leads-state" class="form-select" onchange="renderLeadsTable()"><option value="">All States</option></select>
+    <select id="leads-degree" class="form-select" onchange="renderLeadsTable()"><option value="">All Degrees</option></select>
+    <select id="leads-stage" class="form-select" onchange="renderLeadsTable()"><option value="">All Stages</option></select>
+    <select id="leads-eligible" class="form-select" onchange="renderLeadsTable()">
+      <option value="">All</option><option value="yes">Eligible</option><option value="no">Not Eligible</option>
+    </select>
+    <select id="leads-gulf" class="form-select" onchange="renderLeadsTable()">
+      <option value="">All Regions</option><option value="yes">Gulf</option><option value="india">India</option>
+    </select>
+    <span id="leads-count" style="font-size:12px;color:var(--muted);margin-left:auto;font-weight:500"></span>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>State</th><th>Degree</th><th>Age</th><th>English</th><th>Gulf</th><th>Eligible</th><th>Invite</th><th>Stage</th><th>Actions</th></tr></thead>
+        <tbody id="leads-body"><tr><td colspan="13" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card-foot"><div class="pagination" id="leads-pag"></div></div>
+  </div>
+</div>
+
+<!-- ══ CONVERSATIONS ══ -->
+<div id="tab-conversations" class="tab-content">
+  <div class="sec-header"><div class="sec-title">Conversations</div></div>
+  <div class="status-tabs">
+    <button class="stab active" onclick="loadConvs('open',this)">Open</button>
+    <button class="stab" onclick="loadConvs('pending',this)">Pending</button>
+    <button class="stab" onclick="loadConvs('resolved',this)">Resolved</button>
+  </div>
+  <div class="conv-layout">
+    <div class="conv-sidebar">
+      <div class="conv-sidebar-head"><input id="conv-search" placeholder="Search conversations…" oninput="filterConvList()"></div>
+      <div class="conv-list-scroll" id="conv-list-items"><div class="loading">Loading…</div></div>
+    </div>
+    <div class="chat-pane">
+      <div class="chat-empty" id="chat-empty">
+        <div class="chat-empty-icon">💬</div>
+        <span style="font-weight:600;color:var(--text2)">Select a conversation</span>
+        <span style="font-size:12px">Choose from the list on the left</span>
+      </div>
+      <div id="chat-active" style="display:none;flex:1;flex-direction:column;height:100%">
+        <div class="chat-header">
+          <div class="chat-header-info">
+            <div class="chat-avatar" id="chat-avatar-initials">?</div>
+            <div>
+              <div class="chat-contact-name" id="chat-contact-name"></div>
+              <div class="chat-contact-meta" id="chat-contact-meta"></div>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button class="btn sm" id="resolve-btn" onclick="resolveConv()">✓ Resolve</button>
+            <a id="cw-link" href="#" target="_blank" class="btn sm">↗ Chatwoot</a>
+          </div>
+        </div>
+        <div style="display:flex;flex:1;overflow:hidden">
+          <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-footer">
+              <textarea id="chat-reply" placeholder="Type a reply… (Enter to send, Shift+Enter for newline)" rows="1"></textarea>
+              <button class="btn primary" onclick="sendReply()">Send</button>
+            </div>
+          </div>
+          <div class="lead-panel">
+            <div class="lead-panel-title">Contact</div>
+            <div id="conv-lead-name" style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:10px"></div>
+            <div id="conv-lead-fields"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CAMPAIGNS ══ -->
+<div id="tab-campaigns" class="tab-content">
+  <div class="sec-header"><div class="sec-title">WhatsApp Campaigns</div></div>
+  <div class="row two">
+    <div class="card">
+      <div class="card-head"><span class="card-title">📱 Bulk WhatsApp Send</span></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">State</label><select id="camp-state" class="form-select"><option value="">All</option></select></div>
+          <div class="form-group"><label class="form-label">Degree</label><select id="camp-degree" class="form-select"><option value="">All</option></select></div>
+          <div class="form-group"><label class="form-label">Stage</label><select id="camp-stage" class="form-select"><option value="">All</option></select></div>
+          <div class="form-group"><label class="form-label">Eligible Only?</label><select id="camp-eligible" class="form-select"><option value="">All</option><option value="yes">Eligible Only</option></select></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px">
+          <span style="font-size:13px;color:var(--muted);font-weight:500">Recipients:</span>
+          <span class="count-pill" id="camp-count">0 leads</span>
+          <button class="btn sm" onclick="updateCampCount()" style="margin-left:auto">Preview</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea id="camp-msg" class="form-textarea" rows="4" style="width:100%;resize:vertical" placeholder="Hi {name}, exciting Malta Nursing opportunity…"></textarea>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn primary" onclick="sendWACampaign()">📱 Send WhatsApp</button>
+        </div>
+        <div class="send-result" id="wa-result"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Matched Leads Preview</span></div>
+      <div class="tbl-wrap" style="max-height:440px;overflow-y:auto">
+        <table><thead><tr><th>Name</th><th>Phone</th><th>State</th><th>Stage</th></tr></thead>
+        <tbody id="camp-leads-preview"><tr><td colspan="4" class="empty-state">Click Preview to load</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EMAIL ══ -->
+<div id="tab-email" class="tab-content">
+  <div class="sec-header"><div class="sec-title">Email Campaigns</div></div>
+  <div class="row two">
+    <div class="card">
+      <div class="card-head"><span class="card-title">✉ Bulk Email Send</span></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">State</label><select id="email-state" class="form-select"><option value="">All</option></select></div>
+          <div class="form-group"><label class="form-label">Degree</label><select id="email-degree" class="form-select"><option value="">All</option></select></div>
+          <div class="form-group"><label class="form-label">Eligible?</label><select id="email-eligible" class="form-select"><option value="yes">Eligible Only</option><option value="">All</option></select></div>
+          <div class="form-group"><label class="form-label">Invite Sent?</label><select id="email-invite" class="form-select"><option value="">All</option><option value="no">Not Sent Yet</option><option value="yes">Already Sent</option></select></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px">
+          <span style="font-size:13px;color:var(--muted);font-weight:500">Recipients:</span>
+          <span class="count-pill" id="email-count">0 leads</span>
+          <button class="btn sm" onclick="updateEmailCount()">Preview</button>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">Subject</label>
+          <input id="email-subject" class="form-input" style="width:100%" value="Malta Nursing Opportunity — Healthmark Malta">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Body</label>
+          <textarea id="email-body" class="form-textarea" rows="7" style="width:100%;resize:vertical">Dear {name},
+
+Further to our discussion, I am pleased to share the Malta Nursing Opportunity details.
+
+Healthmark Malta is currently hiring Care Workers. Monthly Salary: €2,049 + OT (approx. ₹2,25,000)
+
+✓ IELTS/OET not mandatory  ✓ No hospital experience required  ✓ Career gap not an issue
+
+Eligibility: GNM or B.Sc Nursing + Valid Nursing Registration + Basic English + Age up to 44
+
+Please confirm your interest by replying to this email or contacting us on WhatsApp.
+
+Regards,
+Guiders Mission | MEA License: B-2396/KER/PART/1000+/5/9388/2018</textarea>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn primary" onclick="sendEmailCampaign()">✉ Send Emails</button>
+        </div>
+        <div class="send-result" id="email-result"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-title">Email Recipients Preview</span></div>
+      <div class="tbl-wrap" style="max-height:440px;overflow-y:auto">
+        <table><thead><tr><th>Name</th><th>Email</th><th>State</th><th>Invite</th></tr></thead>
+        <tbody id="email-leads-preview"><tr><td colspan="4" class="empty-state">Click Preview to load</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ANALYTICS ══ -->
+<div id="tab-analytics" class="tab-content">
+  <div class="sec-header"><div class="sec-title">Analytics</div></div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi"><div class="kpi-icon blue">👤</div><div class="kpi-label">Total Leads</div><div class="kpi-val" id="an-total">—</div></div>
+    <div class="kpi"><div class="kpi-icon green">✅</div><div class="kpi-label">Eligible</div><div class="kpi-val" id="an-eligible">—</div></div>
+    <div class="kpi"><div class="kpi-icon purple">📨</div><div class="kpi-label">Invite Sent</div><div class="kpi-val" id="an-invited">—</div></div>
+    <div class="kpi"><div class="kpi-icon yellow">🌍</div><div class="kpi-label">Gulf</div><div class="kpi-val" id="an-gulf">—</div></div>
+  </div>
+  <div class="row three">
+    <div class="card"><div class="card-head"><span class="card-title">By Stage</span></div><div class="card-body" id="an-stage-chart"></div></div>
+    <div class="card"><div class="card-head"><span class="card-title">By State</span></div><div class="card-body" id="an-state-chart"></div></div>
+    <div class="card"><div class="card-head"><span class="card-title">By Degree</span></div><div class="card-body" id="an-degree-chart"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="card-title">Full Leads Table</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>State</th><th>Degree</th><th>Age</th><th>English</th><th>Gulf</th><th>Eligible</th><th>Verified</th><th>Invite Sent</th><th>Stage</th></tr></thead>
+        <tbody id="analytics-table-body"><tr><td colspan="11" class="loading">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRICING ══ -->
+<div id="tab-pricing" class="tab-content">
+  <div class="stripe-wrap">
+    <div class="stripe-heading">
+      <h2>Choose Your Plan</h2>
+      <p>Upgrade to unlock more features for your recruitment operations</p>
+    </div>
+    <stripe-pricing-table
+      pricing-table-id="prctbl_1TaK2NJWa5B2ayZgqa6bHL33"
+      publishable-key="pk_live_51R1PadJWa5B2ayZg4ytt9Q9hI0b8j3Br1jXy7o1FVsiwBgPt6QGx4wYeWuonnkUyH82xRDNHB54xg95dK7wJkpG900cPYq5DuQ">
+    </stripe-pricing-table>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const N8N = 'https://n8n.aiingo.com/webhook';
+const CW_BASE = 'https://app.aiingo.com';
+const CW_ACCOUNT = 6;
+const CW_INBOX = 7;
+const CW_TOKEN = 'vsBz2BHfdvU5eYifV3VvUBN3';
+
+const API = {
+  leads:        `${N8N}/gmtt/fH9cnX6bchOtZJ9R05uuqarN/leads`,
+  leadsUpdate:  `${N8N}/gmtt/TI2Uco896XOqMQpsA7dX83xj/leads/update`,
+  conversations:`${N8N}/gmtt/poPpDqgxgpRQtAXohgxNm4Pd/conversations`,
+  convMessages: `${N8N}/gmtt/cW1mEsGaKpXn3hJoRt7vZq8Y/conv-messages`,
+  sendReply:    `${N8N}/gmtt/rP2nFuHbLdQk5mViWc6xYz9T/send-reply`,
+  toggleStatus: `${N8N}/gmtt/sT4kGjNpBvRm8wEaZy1xCu3F/toggle-status`,
+  waSend:       `${N8N}/gmtt/oHGzPaIDZi9O1TAJjzzJEfAa/whatsapp/send`,
+  emailSend:    `${N8N}/gmtt/oR9jRW6lmlWBFXAge2kYbzZG/email/send`,
+  analytics:    `${N8N}/gmtt/ZIvXdtJgKHbFL3WeiJPdqVlc/analytics`,
+  automation:   `${N8N}/gmtt/NQn8IEFhmSGUN9pFGUkyUj9W/automation/trigger`,
+};
+
+const STAGE_OPTIONS = ['New','Contacted','Screening','Interviewed','Selected','Invited','Processing','Rejected','On Hold'];
+let allLeads=[], allConvs=[], convStatus='open', selectedConvId=null, leadsPage=1;
+const PAGE_SIZE = 25;
+
+window.addEventListener('DOMContentLoaded', () => {
+  startClock(); loadAll();
+  document.getElementById('chat-reply').addEventListener('keydown', e => {
+    if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendReply(); }
+  });
+});
+
+function loadAll() { loadLeads(); loadConvs(convStatus); loadAnalytics(); }
+
+function startClock() {
+  const el = document.getElementById('live-clock');
+  setInterval(() => { el.textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }, 1000);
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tnav').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tnav').forEach(b => {
+    if (b.textContent.toLowerCase().includes(name)) b.classList.add('active');
+  });
+}
+
+// ── LEADS ──
+async function loadLeads() {
+  try {
+    const r = await fetch(API.leads, { headers: { 'Accept': 'application/json' } });
+    const data = await r.json();
+    allLeads = Array.isArray(data) ? data : (data.leads || data.rows || []);
+    populateLeadFilters(); renderLeadsTable(); updateOverviewKPIs(); renderOverviewCharts();
+  } catch(e) {
+    document.getElementById('leads-body').innerHTML = `<tr><td colspan="13" class="empty-state">Error: ${e.message}</td></tr>`;
+    toast('Error loading leads', 'err');
+  }
+}
+
+function populateLeadFilters() {
+  const states  = [...new Set(allLeads.map(l => l['State']||l.state).filter(Boolean))].sort();
+  const degrees = [...new Set(allLeads.map(l => l['Degree']||l.degree).filter(Boolean))].sort();
+  const stages  = [...new Set(allLeads.map(l => l['Stage']||l.stage).filter(Boolean))].sort();
+  ['leads-state','camp-state','email-state'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">All States</option>` + states.map(s=>`<option value="${s}">${s}</option>`).join('');
+    el.value = cur;
+  });
+  ['leads-degree','camp-degree','email-degree'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">All Degrees</option>` + degrees.map(d=>`<option value="${d}">${d}</option>`).join('');
+    el.value = cur;
+  });
+  ['leads-stage','camp-stage'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">All Stages</option>` + stages.map(s=>`<option value="${s}">${s}</option>`).join('');
+    el.value = cur;
+  });
+}
+
+function getLeadVal(l, ...keys) {
+  for (const k of keys) { const v = l[k]; if (v !== undefined && v !== null && v !== '') return String(v); }
+  return '';
+}
+
+function filterLeads(extra = {}) {
+  const q      = (document.getElementById('leads-search')?.value || '').toLowerCase();
+  const state  = extra.state    || document.getElementById('leads-state')?.value   || '';
+  const degree = extra.degree   || document.getElementById('leads-degree')?.value  || '';
+  const stage  = extra.stage    || document.getElementById('leads-stage')?.value   || '';
+  const elig   = extra.eligible || document.getElementById('leads-eligible')?.value || '';
+  const gulf   = extra.gulf     || document.getElementById('leads-gulf')?.value    || '';
+  const invite = extra.invite   || '';
+  const emailOnly = extra.emailOnly || false;
+  return allLeads.filter(l => {
+    const name  = (getLeadVal(l,'Name','name')||'').toLowerCase();
+    const phone = (getLeadVal(l,'Phone Number','phone')||'').toLowerCase();
+    const email = (getLeadVal(l,'Email ID','email')||'').toLowerCase();
+    if (q && !name.includes(q) && !phone.includes(q) && !email.includes(q)) return false;
+    if (state  && getLeadVal(l,'State','state') !== state) return false;
+    if (degree && getLeadVal(l,'Degree','degree') !== degree) return false;
+    if (stage  && getLeadVal(l,'Stage','stage') !== stage) return false;
+    if (elig==='yes' && String(getLeadVal(l,'Eligible','eligible')).toLowerCase() !== 'true') return false;
+    if (elig==='no'  && String(getLeadVal(l,'Eligible','eligible')).toLowerCase() === 'true') return false;
+    if (gulf==='yes'   && String(getLeadVal(l,'Is_Gulf','gulf')).toLowerCase() !== 'yes') return false;
+    if (gulf==='india' && String(getLeadVal(l,'Is_Gulf','gulf')).toLowerCase() === 'yes') return false;
+    if (invite==='yes' && String(getLeadVal(l,'Invite_Sent','invite_sent')).toLowerCase() !== 'yes') return false;
+    if (invite==='no'  && String(getLeadVal(l,'Invite_Sent','invite_sent')).toLowerCase() === 'yes') return false;
+    if (emailOnly && !email) return false;
+    return true;
+  });
+}
+
+function renderLeadsTable() {
+  const filtered = filterLeads(); leadsPage = 1;
+  renderLeadsPage(filtered);
+  document.getElementById('leads-count').textContent = `${filtered.length} of ${allLeads.length} leads`;
+}
+
+function renderLeadsPage(filtered) {
+  const pages = Math.ceil(filtered.length / PAGE_SIZE);
+  const start = (leadsPage - 1) * PAGE_SIZE;
+  const slice = filtered.slice(start, start + PAGE_SIZE);
+  const tbody = document.getElementById('leads-body');
+  if (!slice.length) { tbody.innerHTML = '<tr><td colspan="13" class="empty-state">No leads match filters</td></tr>'; return; }
+  tbody.innerHTML = slice.map((l, i) => {
+    const name   = getLeadVal(l,'Name','name') || '—';
+    const phone  = getLeadVal(l,'Phone Number','phone') || '—';
+    const email  = getLeadVal(l,'Email ID','email') || '—';
+    const state  = getLeadVal(l,'State','state') || '—';
+    const degree = getLeadVal(l,'Degree','degree') || '—';
+    const age    = getLeadVal(l,'Age','age') || '—';
+    const eng    = getLeadVal(l,'English_Speaking','english') || '—';
+    const gulf   = getLeadVal(l,'Is_Gulf','gulf') || '—';
+    const elig   = String(getLeadVal(l,'Eligible','eligible')).toLowerCase() === 'true';
+    const inv    = String(getLeadVal(l,'Invite_Sent','invite_sent')).toLowerCase() === 'yes';
+    const stage  = getLeadVal(l,'Stage','stage') || 'New';
+    const id     = getLeadVal(l,'SL NO','id') || (start + i + 1);
+    return `<tr>
+      <td style="color:var(--muted2);font-size:12px">${id}</td>
+      <td><strong style="color:var(--text)">${name}</strong></td>
+      <td>${phone} <button class="copy-btn" onclick="copyText('${phone}')">⎘</button></td>
+      <td style="font-size:12px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${email}</td>
+      <td>${state}</td><td>${degree}</td><td>${age}</td><td>${eng}</td>
+      <td>${gulf==='yes'?'<span class="badge blue">Gulf</span>':'<span class="badge grey">India</span>'}</td>
+      <td>${elig?'<span class="badge green">✓ Yes</span>':'<span class="badge red">✗ No</span>'}</td>
+      <td>${inv?'<span class="badge purple">Sent</span>':'<span class="badge grey">—</span>'}</td>
+      <td><select class="stage-sel" onchange="updateStage('${id}',this.value)">${STAGE_OPTIONS.map(s=>`<option${s===stage?' selected':''}>${s}</option>`).join('')}</select></td>
+      <td style="display:flex;gap:4px">
+        <button class="btn sm" onclick="quickWA('${phone}','${name}')">📱</button>
+        <button class="btn sm" onclick="quickEmail('${email}','${name}')">✉</button>
+      </td></tr>`;
+  }).join('');
+  const pag = document.getElementById('leads-pag');
+  pag.innerHTML = `<button onclick="leadsPage=Math.max(1,leadsPage-1);renderLeadsPage(filterLeads())" ${leadsPage===1?'disabled':''}>‹ Prev</button><span>Page ${leadsPage} / ${pages||1}</span><button onclick="leadsPage=Math.min(${pages},leadsPage+1);renderLeadsPage(filterLeads())" ${leadsPage>=pages?'disabled':''}>Next ›</button>`;
+}
+
+async function updateStage(id, stage) {
+  try {
+    await fetch(API.leadsUpdate, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id, fields:{Stage:stage}}) });
+    const lead = allLeads.find(l => String(getLeadVal(l,'SL NO','id')) === String(id));
+    if (lead) { lead['Stage'] = stage; lead.stage = stage; }
+    toast(`Stage → ${stage}`, 'ok');
+  } catch(e) { toast('Update failed', 'err'); }
+}
+
+function quickWA(phone, name) {
+  showTab('campaigns');
+  document.getElementById('camp-msg').value = `Hi ${name}, Guiders Mission here! We have an exciting Malta Nursing opportunity for you 🇲🇹. Let us know if you'd like details.`;
+}
+function quickEmail(email, name) { showTab('email'); }
+
+function exportLeadsCSV() {
+  const filtered = filterLeads();
+  const cols = ['SL NO','Name','Phone Number','Email ID','State','Degree','Age','English_Speaking','Is_Gulf','Eligible','Invite_Sent','Stage'];
+  const rows = [cols.join(','), ...filtered.map(l => cols.map(c => `"${(l[c]||'').toString().replace(/"/g,'""')}"`).join(','))];
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(rows.join('\n'));
+  a.download = 'gmtt-leads.csv'; a.click(); toast(`Exported ${filtered.length} rows`, 'ok');
+}
+
+// ── OVERVIEW ──
+function updateOverviewKPIs() {
+  const total = allLeads.length;
+  const eligible   = allLeads.filter(l => String(getLeadVal(l,'Eligible','eligible')).toLowerCase() === 'true').length;
+  const invited    = allLeads.filter(l => String(getLeadVal(l,'Invite_Sent','invite_sent')).toLowerCase() === 'yes').length;
+  const gulf       = allLeads.filter(l => String(getLeadVal(l,'Is_Gulf','gulf')).toLowerCase() === 'yes').length;
+  const unverified = allLeads.filter(l => !String(getLeadVal(l,'Verified','verified')).toLowerCase().includes('yes')).length;
+  document.getElementById('kpi-total').textContent     = total;
+  document.getElementById('kpi-eligible').textContent  = eligible;
+  document.getElementById('kpi-invited').textContent   = invited;
+  document.getElementById('kpi-gulf').textContent      = gulf;
+  document.getElementById('kpi-unverified').textContent= unverified;
+  const tbody = document.getElementById('recent-leads-body');
+  tbody.innerHTML = allLeads.slice(0,10).map(l => {
+    const elig = String(getLeadVal(l,'Eligible','eligible')).toLowerCase() === 'true';
+    const stage = getLeadVal(l,'Stage','stage') || 'New';
+    return `<tr><td><strong>${getLeadVal(l,'Name','name')||'—'}</strong></td><td>${getLeadVal(l,'State','state')||'—'}</td><td>${getLeadVal(l,'Degree','degree')||'—'}</td><td><span class="badge ${stageColor(stage)}">${stage}</span></td><td>${elig?'<span class="badge green">Yes</span>':'<span class="badge red">No</span>'}</td></tr>`;
+  }).join('');
+}
+
+function stageColor(s) {
+  return {New:'grey',Contacted:'blue',Screening:'blue',Interviewed:'yellow',Selected:'green',Invited:'purple',Processing:'green',Rejected:'red','On Hold':'yellow'}[s] || 'grey';
+}
+
+function renderOverviewCharts() {
+  const stages = {}; allLeads.forEach(l => { const s = getLeadVal(l,'Stage','stage')||'New'; stages[s]=(stages[s]||0)+1; });
+  document.getElementById('stage-chart').innerHTML = renderProgBars(stages, allLeads.length);
+  const statesObj = {}; allLeads.forEach(l => { const s=getLeadVal(l,'State','state'); if(s) statesObj[s]=(statesObj[s]||0)+1; });
+  const topStates = Object.entries(statesObj).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  document.getElementById('state-chart').innerHTML = renderProgBars(Object.fromEntries(topStates), topStates[0]?.[1]||1, 'green');
+  const degrees = {}; allLeads.forEach(l => { const d=getLeadVal(l,'Degree','degree'); if(d) degrees[d]=(degrees[d]||0)+1; });
+  document.getElementById('degree-chart').innerHTML = renderProgBars(degrees, allLeads.length, 'yellow');
+}
+
+function renderProgBars(obj, max, cls='') {
+  return Object.entries(obj).map(([k,v]) => `
+    <div class="prog-item">
+      <div class="prog-row"><span>${k}</span><span style="font-weight:600;color:var(--text2)">${v}</span></div>
+      <div class="prog-track"><div class="prog-fill ${cls}" style="width:${Math.round(v/max*100)}%"></div></div>
+    </div>`).join('');
+}
+
+// ── CONVERSATIONS ──
+async function loadConvs(status, btn) {
+  convStatus = status;
+  if (btn) { document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  document.getElementById('conv-list-items').innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const r = await fetch(`${API.conversations}?status=${status}`, { headers: {'Accept':'application/json'} });
+    const data = await r.json();
+    const convs = Array.isArray(data) ? data : (data.data?.payload || data.payload || []);
+    if (status==='open')     document.getElementById('kpi-open').textContent    = convs.length;
+    if (status==='pending')  document.getElementById('kpi-pending').textContent  = convs.length;
+    if (status==='resolved') document.getElementById('kpi-resolved').textContent = convs.length;
+    allConvs = convs; renderConvList(convs);
+  } catch(e) { document.getElementById('conv-list-items').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`; }
+}
+
+function renderConvList(convs) {
+  if (!convs.length) { document.getElementById('conv-list-items').innerHTML = '<div class="empty-state">No conversations</div>'; return; }
+  document.getElementById('conv-list-items').innerHTML = convs.map(c => {
+    const name    = c.contactName || c.meta?.sender?.name || 'Unknown';
+    const rawId   = c.rawId || c.id;
+    const preview = c.preview || c.last_non_activity_message?.content || '';
+    const lastTs  = c.lastTs || (c.last_activity_at ? new Date(c.last_activity_at*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '');
+    const unread  = c.unread || c.unread_count || 0;
+    const status  = c.status || 'open';
+    const sdot    = status==='open'?'#059669':status==='pending'?'#d97706':'#9ca3af';
+    return `<div class="conv-item" data-id="${rawId}" onclick="openConv('${rawId}')">
+      <div class="conv-meta-row">
+        <span class="conv-name">${name}</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <span style="width:6px;height:6px;border-radius:50%;background:${sdot};display:inline-block"></span>
+          <span class="conv-time">${lastTs}</span>
+          ${unread ? `<span class="unread-badge">${unread}</span>` : ''}
+        </div>
+      </div>
+      <div class="conv-preview">${preview || '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterConvList() {
+  const q = document.getElementById('conv-search').value.toLowerCase();
+  document.querySelectorAll('.conv-item').forEach(el => { el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none'; });
+}
+
+async function openConv(id) {
+  selectedConvId = id;
+  document.querySelectorAll('.conv-item').forEach(el => el.classList.toggle('selected', String(el.dataset.id)===String(id)));
+  document.getElementById('chat-empty').style.display = 'none';
+  document.getElementById('chat-active').style.display = 'flex';
+  const conv = allConvs.find(c => String(c.rawId||c.id) == String(id));
+  const name  = conv?.contactName || conv?.meta?.sender?.name || 'Unknown';
+  const phone = conv?.contactPhone || conv?.meta?.sender?.phone_number || conv?.meta?.sender?.identifier || '';
+  document.getElementById('chat-contact-name').textContent = name;
+  document.getElementById('chat-contact-meta').textContent = phone;
+  document.getElementById('chat-avatar-initials').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('cw-link').href = `${CW_BASE}/app/accounts/${CW_ACCOUNT}/conversations/${id}`;
+  document.getElementById('resolve-btn').textContent = conv?.status==='resolved' ? '↩ Reopen' : '✓ Resolve';
+  document.getElementById('chat-messages').innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const r = await fetch(API.convMessages, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({convId:id}) });
+    const data = await r.json();
+    renderMessages(Array.isArray(data) ? data : (data.payload || []));
+  } catch(e) { document.getElementById('chat-messages').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`; }
+  renderConvLeadPanel({ name, phone_number: phone });
+}
+
+function renderMessages(msgs) {
+  const el = document.getElementById('chat-messages');
+  if (!msgs.length) { el.innerHTML = '<div class="empty-state">No messages yet</div>'; return; }
+  el.innerHTML = msgs.filter(m => m.message_type !== undefined && m.content).map(m => {
+    const isOut = m.message_type === 1;
+    const time = m.created_at ? new Date(m.created_at*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+    return `<div class="msg ${isOut?'outgoing':'incoming'}"><div class="msg-bubble">${m.content||''}</div><div class="msg-time">${time}</div></div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderConvLeadPanel(sender) {
+  document.getElementById('conv-lead-name').textContent = sender.name || '—';
+  const phone = sender.phone_number || sender.identifier || '';
+  const m = allLeads.find(l => { const lp=String(getLeadVal(l,'Phone Number','phone')||'').replace(/\D/g,''); const sp=phone.replace(/\D/g,''); return lp&&sp&&(lp.endsWith(sp)||sp.endsWith(lp)); });
+  const el = document.getElementById('conv-lead-fields');
+  if (!m) { el.innerHTML = `<div style="font-size:12px;color:var(--muted)">${phone||'No phone'}</div>`; return; }
+  el.innerHTML = [['State',getLeadVal(m,'State','state')],['Degree',getLeadVal(m,'Degree','degree')],['Age',getLeadVal(m,'Age','age')],['English',getLeadVal(m,'English_Speaking','english')],['Gulf',getLeadVal(m,'Is_Gulf','gulf')],['Eligible',getLeadVal(m,'Eligible','eligible')],['Stage',getLeadVal(m,'Stage','stage')||'New'],['Call Time',getLeadVal(m,'preferred call time','callTime')]].map(([label,value]) => `<div class="lf-item"><div class="lf-label">${label}</div><div class="lf-value">${value||'—'}</div></div>`).join('');
+}
+
+async function sendReply() {
+  if (!selectedConvId) { toast('Select a conversation', 'err'); return; }
+  const input = document.getElementById('chat-reply'); const msg = input.value.trim(); if (!msg) return; input.value = '';
+  try {
+    await fetch(API.sendReply, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({convId:selectedConvId, message:msg}) });
+    toast('Message sent', 'ok'); openConv(selectedConvId);
+  } catch(e) { toast('Send failed', 'err'); }
+}
+
+async function resolveConv() {
+  if (!selectedConvId) return;
+  const conv = allConvs.find(c => String(c.rawId||c.id)==String(selectedConvId));
+  const newStatus = conv?.status==='resolved' ? 'open' : 'resolved';
+  try {
+    await fetch(API.toggleStatus, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({convId:selectedConvId, status:newStatus}) });
+    toast(`Conversation ${newStatus}`, 'ok'); loadConvs(convStatus);
+  } catch(e) { toast('Status update failed', 'err'); }
+}
+
+// ── CAMPAIGNS ──
+function getCampFiltered() { return filterLeads({ state:document.getElementById('camp-state').value, degree:document.getElementById('camp-degree').value, stage:document.getElementById('camp-stage').value, eligible:document.getElementById('camp-eligible').value }); }
+
+function updateCampCount() {
+  const filtered = getCampFiltered();
+  document.getElementById('camp-count').textContent = `${filtered.length} leads`;
+  document.getElementById('camp-leads-preview').innerHTML = filtered.slice(0,50).map(l => `<tr><td><strong>${getLeadVal(l,'Name','name')||'—'}</strong></td><td>${getLeadVal(l,'Phone Number','phone')||'—'}</td><td>${getLeadVal(l,'State','state')||'—'}</td><td><span class="badge ${stageColor(getLeadVal(l,'Stage','stage')||'New')}">${getLeadVal(l,'Stage','stage')||'New'}</span></td></tr>`).join('');
+}
+
+async function sendWACampaign() {
+  const filtered = getCampFiltered(); const msg = document.getElementById('camp-msg').value.trim();
+  if (!msg) { toast('Enter a message', 'err'); return; }
+  if (!filtered.length) { toast('No leads match filters', 'warn'); return; }
+  if (!confirm(`Send WhatsApp to ${filtered.length} leads?`)) return;
+  const resultEl = document.getElementById('wa-result'); resultEl.style.display='block'; resultEl.className='send-result'; resultEl.textContent=`Sending to ${filtered.length} leads…`;
+  try {
+    const r = await fetch(API.automation, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:'bulk_whatsapp', leads: filtered.map(l=>({ phone:getLeadVal(l,'Phone Number','phone'), name:getLeadVal(l,'Name','name'), message:msg.replace('{name}',getLeadVal(l,'Name','name')||'there') })) }) });
+    const d = await r.json();
+    resultEl.className='send-result ok'; resultEl.innerHTML=`✅ Queued for ${filtered.length} leads.`; toast('Campaign queued','ok');
+  } catch(e) { resultEl.className='send-result err'; resultEl.innerHTML=`❌ Error: ${e.message}`; toast('Campaign failed','err'); }
+}
+
+// ── EMAIL ──
+function getEmailFiltered() { return filterLeads({ state:document.getElementById('email-state').value, degree:document.getElementById('email-degree').value, eligible:document.getElementById('email-eligible').value, invite:document.getElementById('email-invite').value, emailOnly:true }); }
+
+function updateEmailCount() {
+  const filtered = getEmailFiltered();
+  document.getElementById('email-count').textContent = `${filtered.length} leads`;
+  document.getElementById('email-leads-preview').innerHTML = filtered.slice(0,50).map(l => `<tr><td><strong>${getLeadVal(l,'Name','name')||'—'}</strong></td><td style="font-size:12px">${getLeadVal(l,'Email ID','email')||'—'}</td><td>${getLeadVal(l,'State','state')||'—'}</td><td>${String(getLeadVal(l,'Invite_Sent','invite_sent')).toLowerCase()==='yes'?'<span class="badge purple">Sent</span>':'<span class="badge grey">—</span>'}</td></tr>`).join('');
+}
+
+async function sendEmailCampaign() {
+  const filtered = getEmailFiltered(); const subject = document.getElementById('email-subject').value.trim(); const body = document.getElementById('email-body').value.trim();
+  if (!subject||!body) { toast('Enter subject and body','err'); return; }
+  if (!filtered.length) { toast('No leads match filters','warn'); return; }
+  if (!confirm(`Send email to ${filtered.length} leads?`)) return;
+  const resultEl = document.getElementById('email-result'); resultEl.style.display='block'; resultEl.className='send-result'; resultEl.textContent=`Sending to ${filtered.length} leads…`;
+  try {
+    await fetch(API.automation, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:'bulk_invite', leads: filtered.map(l=>({ email:getLeadVal(l,'Email ID','email'), name:getLeadVal(l,'Name','name'), subject, body:body.replace(/{name}/g,getLeadVal(l,'Name','name')||'Candidate') })) }) });
+    resultEl.className='send-result ok'; resultEl.innerHTML=`✅ Email campaign queued for ${filtered.length} leads.`; toast('Email campaign queued','ok');
+  } catch(e) { resultEl.className='send-result err'; resultEl.innerHTML=`❌ Error: ${e.message}`; toast('Email send failed','err'); }
+}
+
+// ── ANALYTICS ──
+async function loadAnalytics() {
+  try {
+    const r = await fetch(API.analytics); const d = await r.json();
+    document.getElementById('an-total').textContent    = d.total || allLeads.length || '—';
+    document.getElementById('an-eligible').textContent = d.eligible || allLeads.filter(l=>String(getLeadVal(l,'Eligible','eligible')).toLowerCase()==='true').length || '—';
+    document.getElementById('an-invited').textContent  = d.invited || allLeads.filter(l=>String(getLeadVal(l,'Invite_Sent','invite_sent')).toLowerCase()==='yes').length || '—';
+    document.getElementById('an-gulf').textContent     = (d.byCountry?.yes||0) || allLeads.filter(l=>String(getLeadVal(l,'Is_Gulf','gulf')).toLowerCase()==='yes').length || '—';
+    if (d.byStage) document.getElementById('an-stage-chart').innerHTML = renderProgBars(d.byStage, Math.max(...Object.values(d.byStage)));
+    if (d.byState) document.getElementById('an-state-chart').innerHTML = renderProgBars(Object.fromEntries(Object.entries(d.byState).sort((a,b)=>b[1]-a[1]).slice(0,8)), Math.max(...Object.values(d.byState)),'green');
+    if (d.byDegree) document.getElementById('an-degree-chart').innerHTML = renderProgBars(d.byDegree, Math.max(...Object.values(d.byDegree)),'yellow');
+  } catch(e) {
+    if (!allLeads.length) return;
+    document.getElementById('an-total').textContent    = allLeads.length;
+    document.getElementById('an-eligible').textContent = allLeads.filter(l=>String(getLeadVal(l,'Eligible','eligible')).toLowerCase()==='true').length;
+    document.getElementById('an-invited').textContent  = allLeads.filter(l=>String(getLeadVal(l,'Invite_Sent','invite_sent')).toLowerCase()==='yes').length;
+    document.getElementById('an-gulf').textContent     = allLeads.filter(l=>String(getLeadVal(l,'Is_Gulf','gulf')).toLowerCase()==='yes').length;
+    renderOverviewCharts();
+    ['an-stage-chart','an-state-chart','an-degree-chart'].forEach((id,i) => {
+      const src = ['stage-chart','state-chart','degree-chart'][i];
+      document.getElementById(id).innerHTML = document.getElementById(src).innerHTML;
+    });
+  }
+  document.getElementById('analytics-table-body').innerHTML = allLeads.map((l,i) => {
+    const elig=String(getLeadVal(l,'Eligible','eligible')).toLowerCase()==='true';
+    const inv=String(getLeadVal(l,'Invite_Sent','invite_sent')).toLowerCase()==='yes';
+    const ver=String(getLeadVal(l,'Verified','verified')).toLowerCase().includes('yes');
+    const stage=getLeadVal(l,'Stage','stage')||'New';
+    return `<tr><td style="color:var(--muted2)">${getLeadVal(l,'SL NO','id')||i+1}</td><td><strong>${getLeadVal(l,'Name','name')||'—'}</strong></td><td>${getLeadVal(l,'State','state')||'—'}</td><td>${getLeadVal(l,'Degree','degree')||'—'}</td><td>${getLeadVal(l,'Age','age')||'—'}</td><td>${getLeadVal(l,'English_Speaking','english')||'—'}</td><td>${String(getLeadVal(l,'Is_Gulf','gulf')).toLowerCase()==='yes'?'<span class="badge blue">Gulf</span>':'<span class="badge grey">India</span>'}</td><td>${elig?'<span class="badge green">Yes</span>':'<span class="badge red">No</span>'}</td><td>${ver?'<span class="badge green">✓</span>':'<span class="badge grey">—</span>'}</td><td>${inv?'<span class="badge purple">Sent</span>':'<span class="badge grey">—</span>'}</td><td><span class="badge ${stageColor(stage)}">${stage}</span></td></tr>`;
+  }).join('');
+}
+
+// ── UTILS ──
+function copyText(txt) { navigator.clipboard.writeText(txt).then(() => toast('Copied!','ok')); }
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast ' + type;
+  setTimeout(() => el.classList.add('show'), 10);
+  setTimeout(() => el.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
