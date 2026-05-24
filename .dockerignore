@@ -1,6 +1,3 @@
+.DS_Store
 *.zip
 *.md
-.DS_Store
-Dockerfile
-nginx.conf
-.dockerignore

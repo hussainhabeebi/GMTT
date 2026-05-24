@@ -4,14 +4,29 @@
 
 const CHATWOOT_BASE = 'https://app.aiingo.com/app/accounts/6';
 
-function Conversations({ leads, conversations: initial, onOpenLead, push }) {
+function Conversations({ leads, conversations: initial, setConversations, onOpenLead, push }) {
   const [tab, setTab] = React.useState('open');
-  const [activeId, setActiveId] = React.useState(initial.find(c => c.status === 'open')?.id);
+  const [activeId, setActiveId] = React.useState(null);
   const [convos, setConvos] = React.useState(initial);
   const [search, setSearch] = React.useState('');
   const [draft, setDraft] = React.useState('');
+  const [loadingMsgs, setLoadingMsgs] = React.useState(false);
+  const [loadingTab, setLoadingTab] = React.useState(false);
   const draftRef = React.useRef(null);
   const threadRef = React.useRef(null);
+
+  // Sync with parent when initial changes
+  React.useEffect(() => { setConvos(initial); }, [initial]);
+
+  // Switch tab → load from Chatwoot
+  const switchTab = async (newTab) => {
+    setTab(newTab); setActiveId(null); setLoadingTab(true);
+    try {
+      const live = await window.loadLiveConversations(newTab);
+      setConvos(live);
+    } catch(e) { push('Failed to load conversations', { icon: 'warn' }); }
+    setLoadingTab(false);
+  };
 
   const filtered = convos
     .filter(c => c.status === tab)
@@ -44,32 +59,55 @@ function Conversations({ leads, conversations: initial, onOpenLead, push }) {
   };
   const unreadCount = convos.filter(c => c.status === 'open').reduce((s, c) => s + c.unread, 0);
 
-  const send = () => {
+  const send = async () => {
     const body = draft.trim();
     if (!body || !active) return;
+    const cwId = active._cwId;
+    setDraft('');
+    // Optimistic update
     setConvos(convos.map(c =>
       c.id === active.id
         ? { ...c, lastTs: 'just now', preview: body,
-            messages: [...c.messages, { from: 'me', ts: 'just now', body, author: 'Jaipal' }] }
+            messages: [...(c.messages||[]), { from: 'me', ts: 'just now', body, author: window.GMTT_USER?.name || 'Me' }] }
         : c
     ));
-    setDraft('');
-    push('Reply sent', { icon: 'send' });
+    try {
+      await cwFetch(`/conversations/${cwId}/messages`, 'POST', { content: body, message_type: 'outgoing', private: false });
+      push('Reply sent', { icon: 'send' });
+    } catch(e) { push('Send failed', { icon: 'warn' }); }
   };
 
   const onKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   };
 
-  const resolve = () => {
-    setConvos(convos.map(c => c.id === active.id ? { ...c, status: 'resolved' } : c));
-    push(`${activeLead?.name.split(' ')[0]} resolved`, { icon: 'check' });
+  const resolve = async () => {
+    const cwId = active?._cwId;
+    setConvos(convos.filter(c => c.id !== active.id));
+    setActiveId(null);
+    if (cwId) await cwFetch(`/conversations/${cwId}/toggle_status`, 'POST', { status: 'resolved' }).catch(()=>{});
+    push(`Resolved`, { icon: 'check' });
   };
-  const reopen = () => {
-    setConvos(convos.map(c => c.id === active.id ? { ...c, status: 'open' } : c));
+  const reopen = async () => {
+    const cwId = active?._cwId;
+    if (cwId) await cwFetch(`/conversations/${cwId}/toggle_status`, 'POST', { status: 'open' }).catch(()=>{});
   };
   const markRead = (id) => {
     setConvos(convos.map(c => c.id === id ? { ...c, unread: 0 } : c));
+  };
+
+  // Load messages when selecting a conversation
+  const selectConv = async (id) => {
+    setActiveId(id);
+    markRead(id);
+    const conv = convos.find(c => c.id === id);
+    if (!conv?._cwId || (conv.messages && conv.messages.length > 0)) return;
+    setLoadingMsgs(true);
+    try {
+      const msgs = await window.loadConversationMessages(conv._cwId);
+      setConvos(prev => prev.map(c => c.id === id ? { ...c, messages: msgs } : c));
+    } catch(e) {}
+    setLoadingMsgs(false);
   };
 
   const QUICK_REPLIES = [
@@ -125,7 +163,7 @@ function Conversations({ leads, conversations: initial, onOpenLead, push }) {
               const isActive = c.id === activeId;
               return (
                 <div key={c.id}
-                  onClick={() => { setActiveId(c.id); markRead(c.id); }}
+                  onClick={() => selectConv(c.id)}
                   style={{
                     padding: '12px 14px',
                     cursor: 'pointer',
@@ -256,7 +294,7 @@ function Conversations({ leads, conversations: initial, onOpenLead, push }) {
 
               {/* Messages */}
               <div ref={threadRef} style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
-                {active.messages.map((m, i) => {
+                {(loadingMsgs ? [{ from: 'system', ts: '', body: '…' }] : (active.messages || [])).map((m, i) => {
                   const mine = m.from === 'me';
                   const showAvatar = i === 0 || active.messages[i - 1].from !== m.from;
                   return (

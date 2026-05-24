@@ -1,15 +1,7 @@
 // WhatsApp follow-up + WhatsApp templates pages
 
-const WA_TYPES = [
-  { id: 'reminder',  name: 'Reminder',      icon: '🔔', desc: 'Call coming up',
-    template: (lead) => `Hi ${lead.name.split(' ')[0]}, this is a friendly reminder about your call with Guiders Mission at ${lead.callTime} on ${lead.offDay}. Please keep your OET certificate ready. Reply 1 to confirm. — ${lead.gulf} opening` },
-  { id: 'reengage',  name: 'Re-engagement', icon: '🔄', desc: 'Went cold',
-    template: (lead) => `Hi ${lead.name.split(' ')[0]}, we have not heard from you in a while. The ${lead.gulf} opening is still open and matches your ${lead.degree} profile. Would you like to talk this week? Reply YES or NO.` },
-  { id: 'congrats',  name: 'Congratulations', icon: '🎉', desc: 'Eligibility confirmed',
-    template: (lead) => `Congratulations ${lead.name.split(' ')[0]}! You are eligible for the ${lead.gulf} opening. Our counselor Jaipal will reach out shortly with next steps. Welcome aboard! 🙏` },
-  { id: 'docs',      name: 'Document checklist', icon: '📋', desc: 'Ask for documents',
-    template: (lead) => `Hi ${lead.name.split(' ')[0]}, please share:\n1. Passport (front + back)\n2. Nursing registration certificate\n3. Latest experience certificate\n4. OET/IELTS scorecard\nThank you 🙏` },
-];
+// WA_TYPES loaded from data.jsx
+const WA_TYPES = window.WA_TYPES || [];
 
 function WhatsAppFollowup({ leads, push }) {
   const [selectedIds, setSelectedIds] = React.useState(new Set([leads[0]?.id]));
@@ -221,10 +213,10 @@ function Templates({ push }) {
         sub="Approved templates via Meta Business · WABA 1703 4729 4733 8466"
         right={[
           <SegTabs key="seg" value={filter} onChange={setFilter} options={[
-            { value: 'all', label: 'All', count: WA_TEMPLATES.length },
-            { value: 'approved', label: 'Approved', count: WA_TEMPLATES.filter(t => t.status === 'approved').length },
-            { value: 'pending', label: 'Pending', count: WA_TEMPLATES.filter(t => t.status === 'pending').length },
-            { value: 'rejected', label: 'Rejected', count: WA_TEMPLATES.filter(t => t.status === 'rejected').length },
+            { value: 'all', label: 'All', count: templates.length },
+            { value: 'approved', label: 'Approved', count: templates.filter(t => (t.status||'').toLowerCase() === 'approved').length },
+            { value: 'pending',  label: 'Pending',  count: templates.filter(t => (t.status||'').toLowerCase() === 'pending').length },
+            { value: 'rejected', label: 'Rejected', count: templates.filter(t => (t.status||'').toLowerCase() === 'rejected').length },
           ]} />,
           <button key="new" className="btn btn--sm btn--primary" onClick={() => setNewOpen(true)}>
             <Icon name="plus" size={12} /> New template
@@ -243,7 +235,7 @@ function Templates({ push }) {
             </div>
             <div className="row gap-6">
               <span className="pill pill--neutral">{t.category}</span>
-              <span className="text-xs muted">Updated {t.updated}</span>
+              <span className="text-xs muted">Updated {t.updated || ''}</span>
             </div>
             <div style={{
               background: 'var(--surface-2)',

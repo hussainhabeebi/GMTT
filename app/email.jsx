@@ -1,19 +1,9 @@
 // Email composer — lead picker, 4 templates, live HTML preview, edit mode, bulk send.
 
-// Currency mapping per country
-const SALARY = {
-  'Saudi Arabia': { local: '4,500 SAR/mo', inr: '₹1,00,000' },
-  'UAE':          { local: '6,500 AED/mo', inr: '₹1,47,000' },
-  'Qatar':        { local: '7,000 QAR/mo', inr: '₹1,60,000' },
-  'Oman':         { local: '600 OMR/mo',   inr: '₹1,30,000' },
-  'Kuwait':       { local: '500 KWD/mo',   inr: '₹1,35,000' },
-  'Bahrain':      { local: '450 BHD/mo',   inr: '₹99,000' },
-  'Malta':        { local: '€1,250/mo',    inr: '₹1,12,000' },
-  'Ireland':      { local: '€3,200/mo',    inr: '₹2,88,000' },
-};
+// SALARY loaded from data.jsx
 
 const renderTemplate = (tmpl, lead, counselor = 'Jaipal Menon') => {
-  const sal = SALARY[lead.gulf] || { local: '—', inr: '—' };
+  const sal = (window.SALARY || {})[lead.gulf] || { local: '—', inr: '—' };
   const sub = {
     '{{first_name}}': lead.name.split(' ')[0],
     '{{call_time}}':  lead.callTime,
@@ -46,7 +36,7 @@ function EmailComposer({ leads, push }) {
              :                                    leads;
 
   const lead = leads.find(l => l.id === selectedId) || pool[0];
-  const tmpl = EMAIL_TEMPLATES.find(t => t.id === tmplId);
+  const tmpl = (window.EMAIL_TEMPLATES || []).find(t => t.id === tmplId);
   const rendered = lead && tmpl ? renderTemplate(tmpl, lead) : { subject: '', body: '' };
 
   const [draftSubj, setDraftSubj] = React.useState(rendered.subject);
@@ -189,7 +179,7 @@ function EmailComposer({ leads, push }) {
           </div>
           <div style={{ padding: 14, borderBottom: '1px solid var(--border-subtle)' }}>
             <div className="grid grid-cols-2" style={{ gap: 8 }}>
-              {EMAIL_TEMPLATES.map(t => (
+              {(window.EMAIL_TEMPLATES || []).map(t => (
                 <button key={t.id} onClick={() => setTmplId(t.id)} style={{
                   textAlign: 'left',
                   padding: 10,

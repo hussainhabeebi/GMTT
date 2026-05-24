@@ -333,7 +333,7 @@ function Payments({ push }) {
 }
 
 function PaymentsStripe({ push, addCard, setAddCard }) {
-  const [invoices, setInvoices] = React.useState(INVOICES);
+  const [invoices, setInvoices] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
 
   // Load live invoices from n8n → Stripe
