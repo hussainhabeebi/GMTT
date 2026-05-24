@@ -1,0 +1,12 @@
+.git
+.gitignore
+*.md
+node_modules
+.DS_Store
+scrapbook
+scrap
+.scrap
+scraps
+.tmp
+.cache
+docker-compose.override.yml
