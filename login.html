@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in · GMTT</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app/styles.css" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(900px 600px at 80% -10%, rgba(176,122,85,0.18), transparent 60%),
+        radial-gradient(700px 500px at 0% 110%, rgba(15,76,92,0.14), transparent 60%),
+        var(--bg);
+      font-family: 'Geist', sans-serif;
+      color: var(--ink);
+    }
+    .login {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg);
+      padding: 36px 32px 28px;
+    }
+    .login__brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .login__mark {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
+      display: grid; place-items: center;
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .login__name b { display: block; font-size: 15px; font-weight: 600; }
+    .login__name span { font-size: 12px; color: var(--muted); }
+
+    .login h1 {
+      margin: 12px 0 4px;
+      font-family: 'Instrument Serif', serif;
+      font-weight: 400;
+      font-size: 32px;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+    .login h1 .accent { color: var(--primary); font-style: italic; }
+    .login p.sub { color: var(--muted); font-size: 13px; margin: 0 0 24px; }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      height: 40px;
+      box-sizing: border-box;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-sunken);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .field input:focus {
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    .row-between {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 6px 0 18px;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+    .row-between label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .row-between a { color: var(--primary); text-decoration: none; }
+
+    .btn-primary {
+      width: 100%;
+      height: 42px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.06s, opacity 0.12s;
+    }
+    .btn-primary:hover { opacity: 0.92; }
+    .btn-primary:active { transform: translateY(1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error {
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(217,86,75,0.10);
+      color: var(--accent-coral);
+      border: 1px solid rgba(217,86,75,0.25);
+      font-size: 12.5px;
+      display: none;
+    }
+    .error.show { display: block; }
+
+    .foot {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--muted-2);
+    }
+    .foot b { color: var(--ink-soft); }
+  </style>
+</head>
+<body>
+  <form class="login" id="login-form" autocomplete="on">
+    <div class="login__brand">
+      <div class="login__mark">G</div>
+      <div class="login__name">
+        <b>GMTT</b>
+        <span>Counselor workspace</span>
+      </div>
+    </div>
+
+    <h1>Welcome <span class="accent">back.</span></h1>
+    <p class="sub">Sign in to continue to the workspace.</p>
+
+    <div class="error" id="err"></div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required autocomplete="username"
+             placeholder="you@aiingo.com" />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required autocomplete="current-password"
+             placeholder="••••••••••" />
+    </div>
+
+    <div class="row-between">
+      <label><input type="checkbox" id="remember" checked /> Stay signed in</label>
+      <a href="mailto:support@aiingo.com">Forgot password?</a>
+    </div>
+
+    <button type="submit" class="btn-primary" id="submit">Sign in</button>
+
+    <div class="foot">
+      © GMTT · Guiders Mission Tours and Travels<br />
+      Powered by <b>Aiingo</b>
+    </div>
+  </form>
+
+  <script>
+    // ── Auth check (client-side only — see Dockerfile for nginx basic_auth) ──
+    // SHA-256(password). Hash, not plaintext — still client-visible, so the
+    // serious gate is nginx basic_auth in the Docker image.
+    const EXPECTED_EMAIL = 'gmtt@aiingo.com';
+    const EXPECTED_HASH  = '0997177b9b75953faf5c6d560d56df702edcad60ad765842f6009febe12ad9d6';
+
+    async function sha256(s) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // If already signed in, jump straight to the dashboard
+    if (localStorage.getItem('gmtt_auth') === '1' || sessionStorage.getItem('gmtt_auth') === '1') {
+      location.replace('./GMTT%20Dashboard.html');
+    }
+
+    const form = document.getElementById('login-form');
+    const err  = document.getElementById('err');
+    const btn  = document.getElementById('submit');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.classList.remove('show');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const pwd   = document.getElementById('password').value;
+      const remember = document.getElementById('remember').checked;
+
+      const hash = await sha256(pwd);
+      const ok   = email === EXPECTED_EMAIL && hash === EXPECTED_HASH;
+
+      // Tiny delay so the button state is perceptible
+      await new Promise(r => setTimeout(r, 280));
+
+      if (ok) {
+        const store = remember ? localStorage : sessionStorage;
+        store.setItem('gmtt_auth', '1');
+        store.setItem('gmtt_user', email);
+        store.setItem('gmtt_signed_in_at', new Date().toISOString());
+        location.replace('./GMTT%20Dashboard.html');
+      } else {
+        err.textContent = 'Email or password is incorrect.';
+        err.classList.add('show');
+        btn.disabled = false; btn.textContent = 'Sign in';
+      }
+    });
+  </script>
+</body>
+</html>
