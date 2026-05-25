@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GMTT — Sign In</title>
+<title>GMTT — Sign In · Aiingo</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -11,240 +11,390 @@
   --accent-dark:#1570cd;
   --border:#e5e7eb;
   --text:#1f2937;
+  --text2:#374151;
   --muted:#6b7280;
   --red:#dc2626;
+  --green:#059669;
+  --surface:#fff;
   --font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;
 }
-html,body{height:100%;font-family:var(--font)}
+
+html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased}
+
+/* ── BACKGROUND ── */
 body{
-  background:#1f2d3d;
-  display:flex;
-  align-items:center;
-  justify-content:center;
   min-height:100vh;
+  display:flex;
+  background:#1f2d3d;
   position:relative;
   overflow:hidden;
 }
 
-/* Background pattern */
-body::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:radial-gradient(ellipse at 30% 20%, rgba(31,147,255,.15) 0%, transparent 60%),
-             radial-gradient(ellipse at 70% 80%, rgba(124,58,237,.12) 0%, transparent 60%);
-  pointer-events:none;
+.bg-glow{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 10%, rgba(31,147,255,.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 90%, rgba(124,58,237,.14) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 60% 30%, rgba(5,150,105,.08) 0%, transparent 60%);
 }
 
-.login-wrap{
-  position:relative;
-  z-index:1;
-  width:100%;
-  max-width:420px;
+/* subtle grid */
+.bg-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size:40px 40px;
+}
+
+/* ── LAYOUT ── */
+.page{
+  position:relative;z-index:1;
+  width:100%;display:flex;
+  align-items:center;justify-content:center;
   padding:20px;
 }
 
-.login-card{
+/* ── CARD ── */
+.card{
   background:#fff;
-  border-radius:16px;
-  padding:40px 44px;
-  box-shadow:0 24px 80px rgba(0,0,0,.35);
+  border-radius:20px;
+  width:100%;max-width:420px;
+  padding:40px 44px 36px;
+  box-shadow:0 32px 80px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.05);
+  animation:rise .4s cubic-bezier(.16,1,.3,1);
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  margin-bottom:32px;
+@keyframes rise{
+  from{opacity:0;transform:translateY(20px) scale(.97)}
+  to{opacity:1;transform:none}
+}
+
+/* ── BRAND ── */
+.brand{text-align:center;margin-bottom:32px}
+.brand-logo{
+  display:inline-flex;align-items:center;gap:11px;
+  margin-bottom:10px;
 }
 .brand-icon{
-  width:42px;height:42px;
-  border-radius:10px;
-  background:linear-gradient(135deg,#1f93ff,#7c3aed);
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,#1f93ff 0%,#7c3aed 100%);
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;font-weight:900;color:#fff;
-  letter-spacing:-1px;
+  font-size:20px;font-weight:900;color:#fff;
+  box-shadow:0 4px 14px rgba(31,147,255,.4);
+  flex-shrink:0;
 }
-.brand-name{font-size:22px;font-weight:800;color:#1f2d3d}
-.brand-sub{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.3px;text-align:center;margin-bottom:8px}
+.brand-name{
+  font-size:22px;font-weight:800;
+  color:#1f2d3d;letter-spacing:-.3px;
+}
+.brand-tagline{
+  font-size:12px;color:var(--muted);font-weight:500;
+  background:var(--border);display:inline-block;
+  padding:3px 10px;border-radius:20px;letter-spacing:.3px;
+}
 
-.login-title{font-size:20px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px}
-.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px}
+.login-title{
+  font-size:20px;font-weight:700;color:var(--text);
+  margin-bottom:4px;
+}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
 
+/* ── FIELDS ── */
 .field{margin-bottom:16px}
-.field label{
-  display:block;font-size:11px;font-weight:700;
-  color:#374151;margin-bottom:6px;
+.field-label{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:6px;
+}
+.field-label label{
+  font-size:11px;font-weight:700;color:var(--text2);
   text-transform:uppercase;letter-spacing:.5px;
 }
-.field input{
-  width:100%;padding:10px 13px;
-  border:1.5px solid var(--border);
-  border-radius:8px;font-size:14px;
-  font-family:inherit;outline:none;
-  background:#fafafa;color:var(--text);
-  transition:.15s;
+.input-wrap{position:relative}
+.input-wrap input{
+  width:100%;padding:10px 40px 10px 13px;
+  border:1.5px solid var(--border);border-radius:9px;
+  font-size:14px;font-family:inherit;outline:none;
+  background:#fafafa;color:var(--text);transition:.15s;
+  -webkit-appearance:none;
 }
-.field input:focus{
+.input-wrap input:focus{
   border-color:var(--accent);
   box-shadow:0 0 0 3px rgba(31,147,255,.12);
   background:#fff;
 }
+.input-wrap input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+.input-icon{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:15px;pointer-events:none;
+}
+.toggle-pwd{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:14px;padding:2px;line-height:1;
+}
+.toggle-pwd:hover{color:var(--text2)}
 
-.remember-row{
+/* ── REMEMBER ── */
+.options-row{
   display:flex;align-items:center;
-  gap:8px;margin-bottom:20px;
-  font-size:13px;color:var(--muted);
+  gap:8px;margin-bottom:22px;
 }
-.remember-row input[type=checkbox]{
-  width:15px;height:15px;
-  accent-color:var(--accent);cursor:pointer;
+.checkbox-wrap{display:flex;align-items:center;gap:7px;cursor:pointer}
+.checkbox-wrap input[type=checkbox]{
+  width:16px;height:16px;border-radius:4px;
+  accent-color:var(--accent);cursor:pointer;flex-shrink:0;
 }
+.checkbox-wrap span{font-size:13px;color:var(--muted)}
 
-.login-btn{
-  width:100%;padding:11px;
+/* ── BUTTON ── */
+.sign-btn{
+  width:100%;padding:12px;
   background:var(--accent);color:#fff;
-  border:none;border-radius:8px;
+  border:none;border-radius:9px;
   font-size:14px;font-weight:700;
   cursor:pointer;font-family:inherit;
-  transition:.15s;letter-spacing:.2px;
-  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:.15s;display:flex;
+  align-items:center;justify-content:center;gap:8px;
+  letter-spacing:.2px;
+  box-shadow:0 2px 8px rgba(31,147,255,.3);
 }
-.login-btn:hover{background:var(--accent-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(31,147,255,.35);}
-.login-btn:active{transform:translateY(0)}
-.login-btn.loading{opacity:.7;pointer-events:none}
-.btn-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
-.login-btn.loading .btn-spinner{display:block}
-.login-btn.loading .btn-text{display:none}
-
-.err-msg{
-  color:var(--red);font-size:12px;font-weight:500;
-  text-align:center;margin-top:12px;
-  background:#fef2f2;border:1px solid #fecaca;
-  border-radius:6px;padding:8px 12px;
-  display:none;
+.sign-btn:hover{
+  background:var(--accent-dark);
+  transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(31,147,255,.4);
 }
+.sign-btn:active{transform:none;box-shadow:none}
+.sign-btn:disabled{opacity:.65;pointer-events:none}
 
-.divider{
-  display:flex;align-items:center;gap:10px;
-  margin:20px 0;color:var(--muted);font-size:12px;
+/* spinner */
+.spinner{
+  width:16px;height:16px;
+  border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;
+  animation:spin .6s linear infinite;display:none;flex-shrink:0;
 }
-.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
-
-.footer-text{
-  text-align:center;font-size:11px;color:rgba(255,255,255,.35);
-  margin-top:20px;line-height:1.6;
-}
-
+.sign-btn.loading .spinner{display:block}
+.sign-btn.loading .btn-label{display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.login-card{animation:fadeIn .35s ease}
 
-/* Hint box */
-.hint{
-  background:rgba(31,147,255,.08);
-  border:1px solid rgba(31,147,255,.2);
+/* ── ERROR ── */
+.err-box{
+  display:none;
+  background:#fef2f2;border:1.5px solid #fecaca;
   border-radius:8px;padding:10px 14px;
-  font-size:11px;color:rgba(255,255,255,.5);
-  margin-top:14px;line-height:1.7;
+  color:var(--red);font-size:12px;font-weight:500;
+  text-align:center;margin-top:14px;
+  animation:shake .3s ease;
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+
+/* ── FOOTER ── */
+.card-footer{
+  margin-top:24px;padding-top:18px;
+  border-top:1px solid var(--border);
   text-align:center;
 }
-.hint strong{color:rgba(255,255,255,.75)}
+.card-footer p{font-size:11px;color:var(--muted);line-height:1.7}
+.card-footer strong{color:var(--text2)}
+
+/* ── PAGE FOOTER ── */
+.page-footer{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  font-size:11px;color:rgba(255,255,255,.3);
+  white-space:nowrap;letter-spacing:.3px;
+}
+
+/* ══════════════════
+   MOBILE (≤480px)
+══════════════════ */
+@media(max-width:480px){
+  body{align-items:flex-start}
+  .page{padding:0;align-items:flex-start}
+
+  .card{
+    border-radius:0 0 24px 24px;
+    padding:36px 24px 28px;
+    max-width:100%;
+    box-shadow:0 8px 40px rgba(0,0,0,.3);
+  }
+
+  .brand{margin-bottom:24px}
+  .brand-icon{width:40px;height:40px;font-size:18px}
+  .brand-name{font-size:20px}
+
+  .login-title{font-size:18px}
+  .login-sub{font-size:12px;margin-bottom:22px}
+
+  .input-wrap input{font-size:16px;padding:11px 40px 11px 13px} /* 16px prevents iOS zoom */
+  .sign-btn{padding:13px;font-size:15px}
+
+  .page-footer{bottom:10px;font-size:10px}
+}
+
+/* ══════════════════
+   LANDSCAPE MOBILE
+══════════════════ */
+@media(max-height:600px) and (max-width:768px){
+  .card{padding:24px 28px 20px}
+  .brand{margin-bottom:16px}
+  .field{margin-bottom:12px}
+  .options-row{margin-bottom:14px}
+  .login-sub{margin-bottom:18px}
+}
 </style>
 </head>
 <body>
 
-<div class="login-wrap">
-  <div class="login-card">
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
 
+<div class="page">
+  <div class="card">
+
+    <!-- Brand -->
     <div class="brand">
-      <div class="brand-icon">AI</div>
-      <div>
+      <div class="brand-logo">
+        <div class="brand-icon">AI</div>
         <div class="brand-name">Aiingo</div>
-      </div>
+      </div><br>
+      <span class="brand-tagline">GMTT · Guiders Mission Portal</span>
     </div>
 
     <div class="login-title">Welcome back</div>
-    <div class="login-sub">Sign in to GMTT · Guiders Mission Portal</div>
+    <div class="login-sub">Sign in to your recruitment dashboard</div>
 
+    <!-- Email -->
     <div class="field">
-      <label>Email address</label>
-      <input id="email" type="email" placeholder="you@aiingo.com" autocomplete="email" autofocus>
+      <div class="field-label"><label for="email">Email address</label></div>
+      <div class="input-wrap">
+        <input id="email" type="email" placeholder="you@aiingo.com"
+          autocomplete="email" inputmode="email" autofocus>
+        <span class="input-icon">✉</span>
+      </div>
     </div>
 
+    <!-- Password -->
     <div class="field">
-      <label>Password</label>
-      <input id="pwd" type="password" placeholder="••••••••" autocomplete="current-password">
+      <div class="field-label"><label for="pwd">Password</label></div>
+      <div class="input-wrap">
+        <input id="pwd" type="password" placeholder="••••••••"
+          autocomplete="current-password" id="pwd">
+        <button class="toggle-pwd" type="button" onclick="togglePwd(this)" tabindex="-1">👁</button>
+      </div>
     </div>
 
-    <div class="remember-row">
-      <input type="checkbox" id="stay" checked>
-      <label for="stay" style="cursor:pointer">Stay signed in</label>
+    <!-- Options -->
+    <div class="options-row">
+      <label class="checkbox-wrap">
+        <input type="checkbox" id="stay" checked>
+        <span>Stay signed in</span>
+      </label>
     </div>
 
-    <button class="login-btn" id="login-btn" onclick="doLogin()">
-      <div class="btn-spinner"></div>
-      <span class="btn-text">Sign In →</span>
+    <!-- Button -->
+    <button class="sign-btn" id="sign-btn" onclick="doLogin()">
+      <div class="spinner"></div>
+      <span class="btn-label">Sign In →</span>
     </button>
 
-    <div class="err-msg" id="err-msg">Invalid email or password. Please try again.</div>
+    <div class="err-box" id="err-box">Incorrect email or password. Please try again.</div>
 
-  </div>
+    <!-- Hints -->
+    <div class="card-footer">
+      <p><strong>Admin:</strong> admin@aiingo.com · admin123</p>
+    </div>
 
-  <div class="hint">
-    <strong>Default credentials</strong><br>
-    admin@aiingo.com · admin123
   </div>
 </div>
 
+<div class="page-footer">Powered by Aiingo Technologies · GMTT v5</div>
+
 <script>
 const USERS_KEY = 'gmtt_users';
+const DASHBOARD = 'gmtt-dashboard-v5.html';
+
 const DEFAULT_USERS = [
-  {id:'u1', name:'Admin',   email:'admin@aiingo.com',    pwd:'admin123',   role:'admin', active:true},
-  {id:'u2', name:'Hussain', email:'hussain@aiingo.com',  pwd:'hussain123', role:'admin', active:true},
-  {id:'u3', name:'Sona',    email:'sona@aiingo.com',     pwd:'sona1234',   role:'agent', active:true},
+  {id:'u1', name:'Admin',   email:'admin@aiingo.com',   pwd:'admin123',   role:'admin', active:true},
+  {id:'u2', name:'Hussain', email:'hussain@aiingo.com', pwd:'hussain123', role:'admin', active:true},
+  {id:'u3', name:'Sona',    email:'sona@aiingo.com',    pwd:'sona1234',   role:'agent', active:true},
 ];
 
 function getUsers() {
   try {
-    const stored = JSON.parse(localStorage.getItem(USERS_KEY));
-    if (Array.isArray(stored) && stored.length) return stored;
+    const s = JSON.parse(localStorage.getItem(USERS_KEY));
+    if (Array.isArray(s) && s.length) return s;
   } catch(e) {}
   return DEFAULT_USERS;
 }
 
+function togglePwd(btn) {
+  const input = document.getElementById('pwd');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err-box');
+  el.textContent = msg;
+  el.style.display = 'block';
+  // re-trigger shake
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = '';
+  document.getElementById('pwd').classList.add('err');
+}
+
+function clearErr() {
+  document.getElementById('err-box').style.display = 'none';
+  document.getElementById('pwd').classList.remove('err');
+  document.getElementById('email').classList.remove('err');
+}
+
 function doLogin() {
-  const email = document.getElementById('email').value.trim();
+  clearErr();
+  const email = document.getElementById('email').value.trim().toLowerCase();
   const pwd   = document.getElementById('pwd').value;
   const stay  = document.getElementById('stay').checked;
-  const err   = document.getElementById('err-msg');
-  const btn   = document.getElementById('login-btn');
+  const btn   = document.getElementById('sign-btn');
 
-  err.style.display = 'none';
-
-  if (!email || !pwd) {
-    err.textContent = 'Please enter your email and password.';
-    err.style.display = 'block';
+  if (!email) {
+    document.getElementById('email').classList.add('err');
+    document.getElementById('email').focus();
+    return;
+  }
+  if (!pwd) {
+    document.getElementById('pwd').classList.add('err');
+    document.getElementById('pwd').focus();
     return;
   }
 
+  btn.disabled = true;
   btn.classList.add('loading');
 
   setTimeout(() => {
     const users = getUsers();
-    const user = users.find(u => u.email === email && u.pwd === pwd && u.active !== false);
+    const user  = users.find(u =>
+      u.email.toLowerCase() === email &&
+      u.pwd === pwd &&
+      u.active !== false
+    );
 
     if (!user) {
+      btn.disabled = false;
       btn.classList.remove('loading');
-      err.style.display = 'block';
+      showErr('Incorrect email or password. Please try again.');
       document.getElementById('pwd').value = '';
       document.getElementById('pwd').focus();
       return;
     }
 
     // Save session
-    const session = { id: user.id, name: user.name, email: user.email, role: user.role };
+    const session = {id:user.id, name:user.name, email:user.email, role:user.role};
     sessionStorage.setItem('gmtt_user', JSON.stringify(session));
     if (stay) localStorage.setItem('gmtt_user', JSON.stringify(session));
 
@@ -252,9 +402,9 @@ function doLogin() {
     user.lastLogin = new Date().toLocaleString();
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
 
-    // Redirect
-    window.location.href = 'gmtt-dashboard-v5.html';
-  }, 600);
+    // Go to dashboard
+    window.location.href = DASHBOARD;
+  }, 500);
 }
 
 // Enter key
@@ -262,15 +412,13 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 
-// Auto-login if session exists
-window.addEventListener('DOMContentLoaded', () => {
+// Auto-redirect if already signed in
+(function() {
   try {
-    const session = JSON.parse(sessionStorage.getItem('gmtt_user') || localStorage.getItem('gmtt_user') || 'null');
-    if (session && session.email) {
-      window.location.href = 'gmtt-dashboard-v5.html';
-    }
+    const s = JSON.parse(sessionStorage.getItem('gmtt_user') || localStorage.getItem('gmtt_user') || 'null');
+    if (s && s.email) window.location.href = DASHBOARD;
   } catch(e) {}
-});
+})();
 </script>
 </body>
 </html>

@@ -99,6 +99,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 
 /* ═══ TAB CONTENT ═══ */
 .tab-pane{display:none;flex:1;overflow-y:auto;padding:20px}
+.page-content{width:100%}
 .tab-pane.active{display:block}
 
 /* ═══ CONVERSATION (3-col Chatwoot layout) ═══ */
@@ -287,7 +288,7 @@ tr:last-child td{border-bottom:none}
 .pagination button:disabled{opacity:.4;cursor:default}
 
 /* STRIPE */
-.stripe-page{max-width:1000px;margin:0 auto;padding:0 0 40px}
+.stripe-page{width:100%;padding:0 0 40px}
 .stripe-hero{text-align:center;padding:30px 0 28px;margin-bottom:28px}
 .stripe-hero h2{font-size:26px;font-weight:800;color:var(--text);margin-bottom:6px}
 .stripe-hero p{font-size:14px;color:var(--muted)}
@@ -321,10 +322,89 @@ tr:last-child td{border-bottom:none}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 
-@media(max-width:900px){
-  .conv-3col{grid-template-columns:var(--mid-w) 1fr}
+/* ── TABLET (max 1024px) ── */
+@media(max-width:1024px){
+  :root{--sidebar-w:180px;--mid-w:260px}
   .contact-panel{display:none}
+  .grid3{grid-template-columns:1fr 1fr}
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .pipeline-summary{grid-template-columns:repeat(3,1fr)}
+  .kanban-board{grid-template-columns:repeat(3,minmax(180px,1fr))}
+}
+
+/* ── MOBILE (max 768px) ── */
+@media(max-width:768px){
+  /* Hide sidebar, show mobile nav */
+  .sidebar{display:none}
+  .mobile-nav{display:flex!important}
+  #app{flex-direction:column}
+  .main{width:100%;min-width:0}
+
+  /* Topbar */
+  .topbar-search-wrap{display:none}
+  .topbar-breadcrumb .bc-sep,.topbar-breadcrumb span:first-child{display:none}
+
+  /* Conversations: stack to single col */
+  .conv-3col{grid-template-columns:1fr;height:auto}
+  .conv-mid{display:none}
+  .conv-mid.mobile-show{display:flex}
+  .contact-panel{display:none}
+  #chat-active{min-height:60vh}
+
+  /* Grids */
   .grid2,.grid3{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .pipeline-summary{grid-template-columns:repeat(2,1fr)}
+  .kanban-board{grid-template-columns:repeat(2,minmax(160px,1fr))}
+  .form-grid{grid-template-columns:1fr}
+
+  /* Modals */
+  .modal{width:96vw!important;margin:0 8px}
+  .lead-modal .modal-body{grid-template-columns:1fr}
+  .lm-sidebar{border-right:none;border-bottom:1px solid var(--border)}
+  .ec-layout{grid-template-columns:1fr}
+  .ec-right{display:none}
+
+  /* Tables: horizontal scroll */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:600px}
+
+  /* Page padding */
+  .tab-pane,[style*="padding:20px"]{padding:12px!important}
+
+  /* Email composer templates: wrap */
+  #tpl-btns{flex-wrap:wrap;gap:4px}
+  .tpl-btn{font-size:11px;padding:5px 8px}
+
+  /* Today page */
+  .today-greeting{font-size:18px}
+  .today-grid,.today-grid3{grid-template-columns:1fr}
+
+  /* Topbar */
+  .topbar-search-wrap{max-width:none;flex:1;display:none}
+  [style*="height:52px"]{height:48px!important;padding:0 12px!important}
+}
+
+/* ── MOBILE NAV BAR (bottom) ── */
+.mobile-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:56px;background:var(--sidebar-bg);
+  border-top:1px solid rgba(255,255,255,.08);
+  z-index:400;align-items:center;justify-content:space-around;
+  padding:0 4px;
+}
+.mobile-nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;color:var(--sidebar-text);
+  cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:8px;
+  transition:.1s;flex:1;
+}
+.mobile-nav-btn:hover,.mobile-nav-btn.active{color:var(--sidebar-active);background:var(--sidebar-active-bg)}
+.mobile-nav-btn span:first-child{font-size:18px}
+.mobile-nav-btn span:last-child{font-size:9px;font-weight:600;letter-spacing:.3px}
+@media(max-width:768px){
+  .main{padding-bottom:56px}
 }
 
 /* ═══ TOPBAR UPGRADES ═══ */
@@ -626,10 +706,13 @@ tr:last-child td{border-bottom:none}
 
     <!-- ── LEADS PAGE ── -->
     <div id="page-leads" class="page-content" style="display:none;flex:1;flex-direction:column;overflow:hidden">
-      <div style="flex:1;overflow-y:auto;padding:20px">
+      <div style="flex:1;overflow-y:auto;padding:20px;width:100%">
         <div class="page-header">
           <div><div class="page-title">Leads</div><div class="page-sub">Malta Nursing Recruitment Database</div></div>
-          <button class="btn primary" onclick="exportLeadsCSV()">⬇ Export CSV</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn sm" onclick="loadLeads()">⟳ Refresh</button>
+            <button class="btn primary" onclick="exportLeadsCSV()">⬇ Export CSV</button>
+          </div>
         </div>
         <div class="filters">
           <input id="leads-search" class="f-input" placeholder="🔍  Search name / phone / email…" style="min-width:200px" oninput="renderLeadsTable()">
@@ -654,7 +737,7 @@ tr:last-child td{border-bottom:none}
 
     <!-- ── CAMPAIGNS PAGE ── -->
     <div id="page-campaigns" class="page-content" style="display:none;flex:1;overflow-y:auto">
-      <div style="padding:20px">
+      <div style="padding:20px;width:100%">
         <div class="page-header"><div class="page-title">WhatsApp Campaigns</div></div>
         <div class="grid2">
           <div class="card">
@@ -692,7 +775,7 @@ tr:last-child td{border-bottom:none}
 
     <!-- ── EMAIL PAGE ── -->
     <div id="page-email" class="page-content" style="display:none;flex:1;overflow-y:auto">
-      <div style="padding:20px">
+      <div style="padding:20px;width:100%">
         <div class="page-header"><div class="page-title">Email Campaigns</div></div>
         <div class="grid2">
           <div class="card">
@@ -739,10 +822,11 @@ Guiders Mission | MEA License: B-2396/KER/PART/1000+/5/9388/2018</textarea></div
 
     <!-- ── ANALYTICS PAGE ── -->
     <div id="page-analytics" class="page-content" style="display:none;flex:1;overflow-y:auto">
-      <div style="padding:20px">
+      <div style="padding:20px;width:100%">
         <div class="page-header">
           <div><div class="page-title">Analytics</div><div class="page-sub">Recruitment pipeline intelligence</div></div>
           <div style="display:flex;gap:8px">
+            <button class="btn sm" onclick="loadLeads()">⟳ Refresh</button>
             <select class="f-select" id="an-filter-state" onchange="renderAnalytics()" style="font-size:12px"><option value="">All States</option></select>
             <select class="f-select" id="an-filter-degree" onchange="renderAnalytics()" style="font-size:12px"><option value="">All Degrees</option></select>
             <button class="btn sm primary" onclick="renderAnalytics()">Apply</button>
@@ -812,7 +896,7 @@ Guiders Mission | MEA License: B-2396/KER/PART/1000+/5/9388/2018</textarea></div
 
     <!-- ── USERS PAGE ── -->
     <div id="page-users" class="page-content" style="display:none;flex:1;overflow-y:auto">
-      <div style="padding:20px">
+      <div style="padding:20px;width:100%">
         <div class="page-header">
           <div><div class="page-title">User Management</div><div class="page-sub">Manage access to the GMTT portal</div></div>
           <button class="btn primary" onclick="openAddUser()">+ Add User</button>
@@ -830,7 +914,7 @@ Guiders Mission | MEA License: B-2396/KER/PART/1000+/5/9388/2018</textarea></div
 
     <!-- ── PRICING PAGE ── -->
     <div id="page-pricing" class="page-content" style="display:none;flex:1;overflow-y:auto">
-      <div style="padding:20px">
+      <div style="padding:20px;width:100%">
         <div class="stripe-page">
           <div class="stripe-hero">
             <h2>Choose Your Plan</h2>
@@ -847,8 +931,11 @@ Guiders Mission | MEA License: B-2396/KER/PART/1000+/5/9388/2018</textarea></div
 
     <!-- ── TODAY PAGE ── -->
     <div id="page-today" class="page-content" style="display:flex;flex:1;overflow-y:auto">
-      <div style="padding:20px;max-width:1200px">
-        <div class="today-greeting" id="today-greeting">Good morning 👋</div>
+      <div style="padding:20px;width:100%">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">
+          <div class="today-greeting" id="today-greeting">Good morning 👋</div>
+          <button class="btn sm" onclick="loadLeads();renderToday()" style="margin-top:4px">⟳ Refresh</button>
+        </div>
         <div class="today-sub">Here's what's happening with your Malta recruitment pipeline today.</div>
 
         <!-- Pipeline summary row -->
@@ -900,7 +987,7 @@ Guiders Mission | MEA License: B-2396/KER/PART/1000+/5/9388/2018</textarea></div
 
     <!-- ── KANBAN PAGE ── -->
     <div id="page-kanban" class="page-content" style="display:none;flex:1;overflow:hidden;flex-direction:column">
-      <div style="flex:1;overflow:auto;padding:20px">
+      <div style="flex:1;overflow:auto;padding:20px;width:100%">
         <div class="kanban-header">
           <div>
             <div class="page-title">Pipeline Kanban</div>
@@ -1101,6 +1188,16 @@ Guiders Mission | MEA License: B-2396/KER/PART/1000+/5/9388/2018</textarea></div
   </div>
 </div>
 
+
+<!-- ══ MOBILE BOTTOM NAV ══ -->
+<nav class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-btn active" onclick="mobileNav('today',this)"><span>🏠</span><span>Today</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('conversations',this)"><span>💬</span><span>Chats</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('leads',this)"><span>👤</span><span>Leads</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('analytics',this)"><span>📊</span><span>Reports</span></button>
+  <button class="mobile-nav-btn" onclick="mobileNav('email-composer',this)"><span>✉</span><span>Email</span></button>
+</nav>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1146,6 +1243,10 @@ let currentUser = null;
 try {
   currentUser = JSON.parse(sessionStorage.getItem('gmtt_user') || localStorage.getItem('gmtt_user') || 'null');
 } catch(e) {}
+// Auth guard: redirect to login if no session
+if (!currentUser || !currentUser.email) {
+  window.location.replace('login.html');
+}
 if (!currentUser) currentUser = {name:'Admin', email:'admin@aiingo.com', role:'admin'};
 
 function saveUsers() { localStorage.setItem('gmtt_users', JSON.stringify(USERS)); }
@@ -1575,6 +1676,7 @@ function renderAnalytics() {
 // USER MANAGEMENT
 // ═══════════════════════════════
 function renderUsersTable() {
+  if (!document.getElementById('users-table')) return;
   document.getElementById('users-table').innerHTML = USERS.map(u=>`
     <tr>
       <td><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:${bg(u.name)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff">${u.name.charAt(0)}</div><strong>${u.name}</strong></div></td>
@@ -2263,21 +2365,28 @@ function globalSearch(q) {
 
 // Auto-init today page on first load
 window.addEventListener('DOMContentLoaded', function() {
-  // Set user display from session
+  // Set sidebar user info
   try {
-    const u = currentUser;
-    if (u) {
+    if (currentUser) {
       const sbName = document.getElementById('sb-name');
       const sbRole = document.getElementById('sb-role');
       const sbAv   = document.getElementById('sb-avatar');
-      if (sbName) sbName.textContent = u.name;
-      if (sbRole) sbRole.textContent = u.role === 'admin' ? 'Administrator' : 'Agent';
-      if (sbAv)   sbAv.textContent   = u.name.charAt(0).toUpperCase();
+      if (sbName) sbName.textContent = currentUser.name;
+      if (sbRole) sbRole.textContent = currentUser.role === 'admin' ? 'Administrator' : 'Agent';
+      if (sbAv)   sbAv.textContent   = currentUser.name.charAt(0).toUpperCase();
     }
   } catch(e) {}
   loadAll();
-  setTimeout(function() { renderToday(); }, 900);
+  setTimeout(function() { if (typeof renderToday === 'function') renderToday(); }, 1000);
 });
+
+
+// ── MOBILE NAV ──
+function mobileNav(page, btn) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  showPage(page, null);
+}
 
 </script>
 </body>
