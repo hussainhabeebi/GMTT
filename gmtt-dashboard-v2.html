@@ -1217,6 +1217,12 @@ function showPage(page, linkEl) {
   if (linkEl) linkEl.classList.add('active');
   if (page==='analytics') renderAnalytics();
   if (page==='users') renderUsersTable();
+  if (page==='today') renderToday();
+  if (page==='kanban') renderKanban();
+  if (page==='email-composer') { initEcFilters(); updateEcPreview(); }
+  const el2 = document.getElementById('tb-page-name');
+  const PAGE_NAMES = {today:'Today',conversations:'Conversations',kanban:'Pipeline',leads:'Leads',campaigns:'WhatsApp',email:'Bulk Email','email-composer':'Email Composer',analytics:'Analytics',users:'Users',pricing:'Pricing'};
+  if (el2) el2.textContent = PAGE_NAMES[page] || page;
 }
 
 function loadAll() {
@@ -1729,15 +1735,7 @@ document.addEventListener('click', e => {
   }
 });
 
-// Patch showPage to also update breadcrumb
-const _origShowPage = showPage;
-function showPage(page, linkEl) {
-  _origShowPage(page, linkEl);
-  updateBreadcrumb(page);
-  if (page === 'today') renderToday();
-  if (page === 'kanban') renderKanban();
-  if (page === 'email-composer') { initEcFilters(); updateEcPreview(); }
-}
+// showPage is unified above
 
 // ═══════════════════════════════════════════
 // TODAY PAGE
@@ -2098,7 +2096,7 @@ function lmQuickEmail() {
 }
 
 // Also add View button to leads table - patch existing renderLeadsPage
-const _origRenderLeadsPage = renderLeadsPage;
+
 // We patch via overriding the inline render inside renderLeadsPage
 // Actually we'll add a global openLeadModal call from the name cell onclick
 
@@ -2310,11 +2308,7 @@ function globalSearch(q) {
   }
 }
 
-// Patch loadAll to also refresh today
-const _origLoadAll = loadAll;
-function loadAll() {
-  _origLoadAll();
-}
+
 
 // Auto-init today page on first load
 window.addEventListener('DOMContentLoaded', () => {
