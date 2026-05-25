@@ -46,24 +46,9 @@
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;display:flex}
 
-/* ═══ LOGIN SCREEN ═══ */
-#login-screen{position:fixed;inset:0;background:#1f2d3d;display:flex;align-items:center;justify-content:center;z-index:9999}
-.login-box{background:#fff;border-radius:12px;padding:40px 44px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
-.login-logo img{height:36px}
-.login-title{font-size:22px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px}
-.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px}
-.login-field{margin-bottom:14px}
-.login-field label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
-.login-field input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;transition:.15s;background:#fafafa}
-.login-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,147,255,.12);background:#fff}
-.login-btn{width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;margin-top:6px}
-.login-btn:hover{background:var(--accent-dark)}
-.login-err{color:var(--red);font-size:12px;margin-top:8px;text-align:center;display:none}
-
 /* ═══ APP LAYOUT ═══ */
-#app{display:flex;height:100vh;width:100%;opacity:0;transition:.3s}
-#app.visible{opacity:1}
+#app{display:flex;height:100vh;width:100%;opacity:1;}
+
 
 /* ═══ LEFT SIDEBAR (Chatwoot-exact) ═══ */
 .sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
@@ -456,30 +441,6 @@ tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
-
-<!-- ══════════════════════════════════════
-     LOGIN SCREEN
-══════════════════════════════════════ -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">
-      <img src="http://aiingo.com/wp-content/uploads/2026/01/cropped-Aiingo-1.png.webp" alt="Aiingo" onerror="this.style.display='none'">
-      <span style="font-size:20px;font-weight:800;color:#1f2d3d">Aiingo</span>
-    </div>
-    <div class="login-title">Sign in to GMTT</div>
-    <div class="login-sub">Guiders Mission Recruitment Portal</div>
-    <div class="login-field">
-      <label>Email</label>
-      <input id="login-email" type="email" placeholder="you@aiingo.com" value="admin@aiingo.com">
-    </div>
-    <div class="login-field">
-      <label>Password</label>
-      <input id="login-pwd" type="password" placeholder="••••••••" value="admin123">
-    </div>
-    <button class="login-btn" onclick="doLogin()">Sign In</button>
-    <div class="login-err" id="login-err">Invalid email or password</div>
-  </div>
-</div>
 
 <!-- ══════════════════════════════════════
      MAIN APP
@@ -1169,43 +1130,28 @@ const bg = (n) => AVATARBG[n.charCodeAt(0) % AVATARBG.length];
 // ═══════════════════════════════
 let allLeads=[], allConvs=[], convStatus='open', selectedConvId=null, leadsPage=1;
 const PAGE_SIZE=25;
-let USERS = JSON.parse(localStorage.getItem('gmtt_users') || 'null') || [
+// Always ensure default users exist
+let _storedUsers = null;
+try { _storedUsers = JSON.parse(localStorage.getItem('gmtt_users')); } catch(e) {}
+const DEFAULT_USERS = [
   {id:'u1',name:'Admin',email:'admin@aiingo.com',pwd:'admin123',role:'admin',lastLogin:'Just now',active:true},
   {id:'u2',name:'Hussain',email:'hussain@aiingo.com',pwd:'hussain123',role:'admin',lastLogin:'—',active:true},
   {id:'u3',name:'Sona',email:'sona@aiingo.com',pwd:'sona1234',role:'agent',lastLogin:'—',active:true},
 ];
+// Merge: keep stored users but always ensure defaults exist
+let USERS = _storedUsers && _storedUsers.length ? _storedUsers : DEFAULT_USERS;
+// Ensure default admin always works even if storage is corrupted
+if (!USERS.find(u => u.email === 'admin@aiingo.com')) USERS = DEFAULT_USERS;
 let currentUser = null;
+try {
+  currentUser = JSON.parse(sessionStorage.getItem('gmtt_user') || localStorage.getItem('gmtt_user') || 'null');
+} catch(e) {}
+if (!currentUser) currentUser = {name:'Admin', email:'admin@aiingo.com', role:'admin'};
 
 function saveUsers() { localStorage.setItem('gmtt_users', JSON.stringify(USERS)); }
 
 // ═══════════════════════════════
 // AUTH
-// ═══════════════════════════════
-function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pwd   = document.getElementById('login-pwd').value;
-  const user  = USERS.find(u => u.email === email && u.pwd === pwd && u.active);
-  if (!user) { document.getElementById('login-err').style.display='block'; return; }
-  currentUser = user;
-  user.lastLogin = new Date().toLocaleTimeString();
-  saveUsers();
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').classList.add('visible');
-  document.getElementById('sb-name').textContent = user.name;
-  document.getElementById('sb-role').textContent = user.role === 'admin' ? 'Administrator' : user.role === 'agent' ? 'Agent' : 'Viewer';
-  document.getElementById('sb-avatar').textContent = user.name.charAt(0).toUpperCase();
-  loadAll();
-}
-
-document.getElementById('login-pwd').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
-
-function doLogout() {
-  currentUser = null;
-  document.getElementById('app').classList.remove('visible');
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('login-err').style.display='none';
-}
-
 // ═══════════════════════════════
 // PAGES
 // ═══════════════════════════════
@@ -1336,9 +1282,15 @@ function quickWA(phone,name) { showPage('campaigns',null); document.getElementBy
 function quickEmail(email,name) { showPage('email',null); }
 
 function exportLeadsCSV() {
-  const cols=['SL NO','Name','Phone Number','Email ID','State','Degree','Age','English_Speaking','Is_Gulf','Eligible','Invite_Sent','Stage'];
-  const rows=[cols.join(','),...filterLeads().map(l=>cols.map(c=>`"${(l[c]||'').toString().replace(/"/g,''''')}"`).join(','))];
-  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.join('\n')); a.download='gmtt-leads.csv'; a.click(); toast(`Exported ${filterLeads().length} rows`,'ok');
+  var cols=['SL NO','Name','Phone Number','Email ID','State','Degree','Age','English_Speaking','Is_Gulf','Eligible','Invite_Sent','Stage'];
+  var esc=function(v){return String(v||'').replace(/"/g,'""');};
+  var rows=[cols.join(',')].concat(filterLeads().map(function(l){return cols.map(function(c){return '"'+esc(l[c])+'"';}).join(',');}));
+  var csv=rows.join('\r\n');
+  var a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='gmtt-leads.csv';
+  a.click();
+  toast('Exported '+filterLeads().length+' rows','ok');
 }
 
 // ═══════════════════════════════
@@ -1680,7 +1632,7 @@ function doChangePwd() {
   const id=document.getElementById('cpwd-user-id').value;
   const np=document.getElementById('cpwd-new').value; const cp=document.getElementById('cpwd-confirm').value;
   if(!np||np.length<8){ toast('Min 8 characters','err'); return; }
-  if(np!==cp){ toast('Passwords don't match','err'); return; }
+  if(np!==cp){ toast('Passwords do not match','err'); return; }
   const u=USERS.find(x=>x.id===id); if(!u) return;
   u.pwd=np; saveUsers(); closeModal('modal-change-pwd'); toast('Password updated','ok');
 }
@@ -1696,7 +1648,6 @@ document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('cli
 // ═══════════════════════════════
 function copyText(txt){ navigator.clipboard.writeText(txt).then(()=>toast('Copied!','ok')); }
 function toast(msg,type='ok'){ const el=document.getElementById('toast'); el.textContent=msg; el.className='toast '+type; setTimeout(()=>el.classList.add('show'),10); setTimeout(()=>el.classList.remove('show'),3000); }
-function globalSearch(q){ /* future */ }
 
 // ═══════════════════════════════════════════
 // TOPBAR: breadcrumbs, notifications, ⌘K
@@ -2311,8 +2262,21 @@ function globalSearch(q) {
 
 
 // Auto-init today page on first load
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => { if (allLeads.length) renderToday(); }, 500);
+window.addEventListener('DOMContentLoaded', function() {
+  // Set user display from session
+  try {
+    const u = currentUser;
+    if (u) {
+      const sbName = document.getElementById('sb-name');
+      const sbRole = document.getElementById('sb-role');
+      const sbAv   = document.getElementById('sb-avatar');
+      if (sbName) sbName.textContent = u.name;
+      if (sbRole) sbRole.textContent = u.role === 'admin' ? 'Administrator' : 'Agent';
+      if (sbAv)   sbAv.textContent   = u.name.charAt(0).toUpperCase();
+    }
+  } catch(e) {}
+  loadAll();
+  setTimeout(function() { renderToday(); }, 900);
 });
 
 </script>

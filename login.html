@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GMTT — Sign In</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#1f93ff;
+  --accent-dark:#1570cd;
+  --border:#e5e7eb;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --red:#dc2626;
+  --font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;
+}
+html,body{height:100%;font-family:var(--font)}
+body{
+  background:#1f2d3d;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Background pattern */
+body::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse at 30% 20%, rgba(31,147,255,.15) 0%, transparent 60%),
+             radial-gradient(ellipse at 70% 80%, rgba(124,58,237,.12) 0%, transparent 60%);
+  pointer-events:none;
+}
+
+.login-wrap{
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:420px;
+  padding:20px;
+}
+
+.login-card{
+  background:#fff;
+  border-radius:16px;
+  padding:40px 44px;
+  box-shadow:0 24px 80px rgba(0,0,0,.35);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:32px;
+}
+.brand-icon{
+  width:42px;height:42px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#1f93ff,#7c3aed);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;color:#fff;
+  letter-spacing:-1px;
+}
+.brand-name{font-size:22px;font-weight:800;color:#1f2d3d}
+.brand-sub{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.3px;text-align:center;margin-bottom:8px}
+
+.login-title{font-size:20px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px}
+
+.field{margin-bottom:16px}
+.field label{
+  display:block;font-size:11px;font-weight:700;
+  color:#374151;margin-bottom:6px;
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.field input{
+  width:100%;padding:10px 13px;
+  border:1.5px solid var(--border);
+  border-radius:8px;font-size:14px;
+  font-family:inherit;outline:none;
+  background:#fafafa;color:var(--text);
+  transition:.15s;
+}
+.field input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(31,147,255,.12);
+  background:#fff;
+}
+
+.remember-row{
+  display:flex;align-items:center;
+  gap:8px;margin-bottom:20px;
+  font-size:13px;color:var(--muted);
+}
+.remember-row input[type=checkbox]{
+  width:15px;height:15px;
+  accent-color:var(--accent);cursor:pointer;
+}
+
+.login-btn{
+  width:100%;padding:11px;
+  background:var(--accent);color:#fff;
+  border:none;border-radius:8px;
+  font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+  transition:.15s;letter-spacing:.2px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.login-btn:hover{background:var(--accent-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(31,147,255,.35);}
+.login-btn:active{transform:translateY(0)}
+.login-btn.loading{opacity:.7;pointer-events:none}
+.btn-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.login-btn.loading .btn-spinner{display:block}
+.login-btn.loading .btn-text{display:none}
+
+.err-msg{
+  color:var(--red);font-size:12px;font-weight:500;
+  text-align:center;margin-top:12px;
+  background:#fef2f2;border:1px solid #fecaca;
+  border-radius:6px;padding:8px 12px;
+  display:none;
+}
+
+.divider{
+  display:flex;align-items:center;gap:10px;
+  margin:20px 0;color:var(--muted);font-size:12px;
+}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+
+.footer-text{
+  text-align:center;font-size:11px;color:rgba(255,255,255,.35);
+  margin-top:20px;line-height:1.6;
+}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.login-card{animation:fadeIn .35s ease}
+
+/* Hint box */
+.hint{
+  background:rgba(31,147,255,.08);
+  border:1px solid rgba(31,147,255,.2);
+  border-radius:8px;padding:10px 14px;
+  font-size:11px;color:rgba(255,255,255,.5);
+  margin-top:14px;line-height:1.7;
+  text-align:center;
+}
+.hint strong{color:rgba(255,255,255,.75)}
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="login-card">
+
+    <div class="brand">
+      <div class="brand-icon">AI</div>
+      <div>
+        <div class="brand-name">Aiingo</div>
+      </div>
+    </div>
+
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to GMTT · Guiders Mission Portal</div>
+
+    <div class="field">
+      <label>Email address</label>
+      <input id="email" type="email" placeholder="you@aiingo.com" autocomplete="email" autofocus>
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input id="pwd" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <div class="remember-row">
+      <input type="checkbox" id="stay" checked>
+      <label for="stay" style="cursor:pointer">Stay signed in</label>
+    </div>
+
+    <button class="login-btn" id="login-btn" onclick="doLogin()">
+      <div class="btn-spinner"></div>
+      <span class="btn-text">Sign In →</span>
+    </button>
+
+    <div class="err-msg" id="err-msg">Invalid email or password. Please try again.</div>
+
+  </div>
+
+  <div class="hint">
+    <strong>Default credentials</strong><br>
+    admin@aiingo.com · admin123
+  </div>
+</div>
+
+<script>
+const USERS_KEY = 'gmtt_users';
+const DEFAULT_USERS = [
+  {id:'u1', name:'Admin',   email:'admin@aiingo.com',    pwd:'admin123',   role:'admin', active:true},
+  {id:'u2', name:'Hussain', email:'hussain@aiingo.com',  pwd:'hussain123', role:'admin', active:true},
+  {id:'u3', name:'Sona',    email:'sona@aiingo.com',     pwd:'sona1234',   role:'agent', active:true},
+];
+
+function getUsers() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(USERS_KEY));
+    if (Array.isArray(stored) && stored.length) return stored;
+  } catch(e) {}
+  return DEFAULT_USERS;
+}
+
+function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pwd   = document.getElementById('pwd').value;
+  const stay  = document.getElementById('stay').checked;
+  const err   = document.getElementById('err-msg');
+  const btn   = document.getElementById('login-btn');
+
+  err.style.display = 'none';
+
+  if (!email || !pwd) {
+    err.textContent = 'Please enter your email and password.';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.classList.add('loading');
+
+  setTimeout(() => {
+    const users = getUsers();
+    const user = users.find(u => u.email === email && u.pwd === pwd && u.active !== false);
+
+    if (!user) {
+      btn.classList.remove('loading');
+      err.style.display = 'block';
+      document.getElementById('pwd').value = '';
+      document.getElementById('pwd').focus();
+      return;
+    }
+
+    // Save session
+    const session = { id: user.id, name: user.name, email: user.email, role: user.role };
+    sessionStorage.setItem('gmtt_user', JSON.stringify(session));
+    if (stay) localStorage.setItem('gmtt_user', JSON.stringify(session));
+
+    // Update last login
+    user.lastLogin = new Date().toLocaleString();
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+
+    // Redirect
+    window.location.href = 'gmtt-dashboard-v5.html';
+  }, 600);
+}
+
+// Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// Auto-login if session exists
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    const session = JSON.parse(sessionStorage.getItem('gmtt_user') || localStorage.getItem('gmtt_user') || 'null');
+    if (session && session.email) {
+      window.location.href = 'gmtt-dashboard-v5.html';
+    }
+  } catch(e) {}
+});
+</script>
+</body>
+</html>
