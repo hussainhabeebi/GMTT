@@ -1231,14 +1231,15 @@ const PAGE_SIZE=25;
 let _storedUsers = null;
 try { _storedUsers = JSON.parse(localStorage.getItem('gmtt_users')); } catch(e) {}
 const DEFAULT_USERS = [
-  {id:'u1',name:'Admin',email:'admin@aiingo.com',pwd:'admin123',role:'admin',lastLogin:'Just now',active:true},
-  {id:'u2',name:'Hussain',email:'hussain@aiingo.com',pwd:'hussain123',role:'admin',lastLogin:'—',active:true},
-  {id:'u3',name:'Sona',email:'sona@aiingo.com',pwd:'sona1234',role:'agent',lastLogin:'—',active:true},
+  {id:'u1',name:'Admin',    email:'admin@aiingo.com',    pwd:'Aiingo@2026',   role:'admin', lastLogin:'—',active:true},
+  {id:'u2',name:'Hussain',  email:'hussain@aiingo.com',  pwd:'GMTT@Huss26',   role:'admin', lastLogin:'—',active:true},
+  {id:'u3',name:'Sona',     email:'sona@aiingo.com',     pwd:'GMTT@Sona26',   role:'agent', lastLogin:'—',active:true},
+  {id:'u4',name:'GMTT Staff',email:'staff@gmttcochin.com',pwd:'GMTT@Staff26', role:'agent', lastLogin:'—',active:true},
 ];
-// Merge: keep stored users but always ensure defaults exist
-let USERS = _storedUsers && _storedUsers.length ? _storedUsers : DEFAULT_USERS;
-// Ensure default admin always works even if storage is corrupted
-if (!USERS.find(u => u.email === 'admin@aiingo.com')) USERS = DEFAULT_USERS;
+// Always force-refresh users from DEFAULT_USERS to pick up new passwords/users
+// (comment this line out once users are customised via the UI)
+let USERS = DEFAULT_USERS;
+localStorage.setItem('gmtt_users', JSON.stringify(USERS));
 let currentUser = null;
 try {
   currentUser = JSON.parse(sessionStorage.getItem('gmtt_user') || localStorage.getItem('gmtt_user') || 'null');
@@ -1372,11 +1373,35 @@ function renderLeadsPage(filtered) {
 }
 
 async function updateStage(id, stage) {
+  // 1. Update local state immediately
+  const lead = allLeads.find(x => String(lv(x,'SL NO','id')) === String(id));
+  if (lead) { lead['Stage'] = stage; lead.stage = stage; }
+
+  // 2. Sync to Google Sheets via n8n
   try {
-    await fetch(API.leadsUpdate,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,fields:{Stage:stage}})});
-    const l=allLeads.find(x=>String(lv(x,'SL NO','id'))===String(id)); if(l){l['Stage']=stage;l.stage=stage;}
-    toast(`Stage → ${stage}`,'ok');
-  } catch(e){ toast('Update failed','err'); }
+    const r = await fetch(API.leadsUpdate, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ id, fields:{ Stage: stage } })
+    });
+    toast('Stage → ' + stage + ' ✓ Synced to Sheet', 'ok');
+  } catch(e) {
+    toast('Stage saved locally — sheet sync failed', 'warn');
+  }
+
+  // 3. Re-render wherever visible
+  const activePage = Array.from(document.querySelectorAll('.page-content'))
+    .find(p => p.style.display !== 'none')?.id || '';
+  if (activePage === 'page-kanban') renderKanban();
+  if (activePage === 'page-leads') renderLeadsPage(filterLeads());
+  if (activePage === 'page-today') renderToday();
+  if (activePage === 'page-analytics') renderAnalytics();
+
+  // 4. If lead modal is open for this lead, sync dropdown
+  if (currentLeadId && String(currentLeadId) === String(id)) {
+    const sel = document.getElementById('lm-stage-sel');
+    if (sel) sel.value = stage;
+  }
 }
 
 function quickWA(phone,name) { showPage('campaigns',null); document.getElementById('camp-msg').value=`Hi ${name}, Guiders Mission here! We have an exciting Malta Nursing opportunity for you 🇲🇹`; }
@@ -1994,24 +2019,17 @@ function dragCard(e, id, stage) {
 async function dropCard(e, toStage) {
   e.preventDefault();
   if (!draggedId || draggedFromStage === toStage) return;
-  document.querySelector(`.kcard[data-id="${draggedId}"]`)?.classList.remove('dragging');
+  document.querySelector('.kcard[data-id="' + draggedId + '"]')?.classList.remove('dragging');
 
-  // Map kanban stage back to sheet stage
+  // Map kanban column name → sheet Stage value
   const stageMap = { New:'New', Contacted:'Contacted', Eligible:'Selected', Invited:'Invited', Processing:'Processing', Rejected:'Rejected' };
   const sheetStage = stageMap[toStage] || toStage;
 
-  // Update local
-  const lead = allLeads.find(l => String(lv(l,'SL NO','id')) === String(draggedId));
-  if (lead) { lead['Stage'] = sheetStage; lead.stage = sheetStage; }
-
-  // Sync to GSheets
-  try {
-    await fetch(API.leadsUpdate, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id: draggedId, fields:{Stage: sheetStage}}) });
-    toast(`Moved to ${toStage} → synced`, 'ok');
-  } catch(e) { toast('Move saved locally (sync failed)', 'warn'); }
-
+  const savedId = draggedId;
   draggedId = null; draggedFromStage = null;
-  renderKanban();
+
+  // Delegate to updateStage — handles local update + sheet sync + re-render
+  await updateStage(savedId, sheetStage);
 }
 
 function toggleStar(id, btn) {
